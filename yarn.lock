@@ -10,6 +10,10 @@
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/@types/pixi.js/-/pixi.js-4.4.2.tgz#6c031164f2aef3e005b2c8c727fe851aa77e5a20"
 
+"@types/stats.js@^0.16.0":
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/@types/stats.js/-/stats.js-0.16.0.tgz#8651bbe4efe166acff8ffcdb429e3178597f514d"
+
 "@types/urijs@^1.15.32":
   version "1.15.32"
   resolved "https://registry.yarnpkg.com/@types/urijs/-/urijs-1.15.32.tgz#a6e261745eb580b3f7f4079dab520bd680b50755"
@@ -1988,6 +1992,10 @@ sshpk@^1.7.0:
     jodid25519 "^1.0.0"
     jsbn "~0.1.0"
     tweetnacl "~0.14.0"
+
+stats.js@^0.17.0:
+  version "0.17.0"
+  resolved "https://registry.yarnpkg.com/stats.js/-/stats.js-0.17.0.tgz#b1c3dc46d94498b578b7fd3985b81ace7131cc7d"
 
 "statuses@>= 1.3.1 < 2", statuses@~1.3.1:
   version "1.3.1"
