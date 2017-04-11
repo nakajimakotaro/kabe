@@ -1,0 +1,19 @@
+{
+  "name": "kabe",
+  "version": "1.0.0",
+  "repository": {},
+  "author": "nakajimakotaro <harusann2@gmail.com>",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "copy-webpack-plugin": "^4.0.1",
+    "ts-loader": "^2.0.3",
+    "typescript": "^2.2.2",
+    "webpack": "^2.3.3",
+    "webpack-dev-server": "^2.4.2"
+  },
+  "scripts": {
+    "start": "webpack-dev-server --host=0.0.0.0",
+    "build": "webpack"
+  }
+}
