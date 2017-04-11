@@ -25,6 +25,7 @@ module.exports = {
         new CopyWebpackPlugin([
             {from: 'src/index.html', to: 'public/index.html'},
             {from: 'src/style.css',  to: 'public/style.css'},
+            {from: 'src/map',        to: 'public/map'},
         ])
     ]
 };

@@ -4,8 +4,13 @@
   "repository": {},
   "author": "nakajimakotaro <harusann2@gmail.com>",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "pixi.js": "^4.4.4",
+    "urijs": "^1.18.10"
+  },
   "devDependencies": {
+    "@types/pixi.js": "^4.4.2",
+    "@types/urijs": "^1.15.32",
     "copy-webpack-plugin": "^4.0.1",
     "ts-loader": "^2.0.3",
     "typescript": "^2.2.2",
