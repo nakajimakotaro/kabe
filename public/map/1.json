@@ -1,0 +1,14 @@
+{
+    "gameObject": [
+        {
+            "object": "Wall",
+            "shape": {
+                "type": "rectangle",
+                "x": 100,
+                "y": 100,
+                "w": 300,
+                "h": 50
+            }
+        }
+    ]
+}

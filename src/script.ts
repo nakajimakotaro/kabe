@@ -1,24 +1,24 @@
 import "pixi.js";
 import Stats = require("stats.js");
 import {Level} from "./level";
-import {Loader} from "./loader";
+import {ResourceLoader} from "./resourceLoader";
+import {LevelGenereter} from "./levelGenereter";
 import {Shape} from "./shape";
 
 export class Game{
     stats: Stats;
 
-    loader:Loader;
+    resourceLoader:ResourceLoader;
     app:PIXI.Application;
     level:Level;
 
     constructor(){
         this.stats = new Stats();
-        this.loader = new Loader();
+        this.resourceLoader = new ResourceLoader();
         document.body.appendChild(this.stats.dom);
 
         this.app = new PIXI.Application(960, 540);
         document.body.appendChild(this.app.view);
-        this.level = new Level(game);
     }
     start(){
         requestAnimationFrame(()=>{
@@ -39,19 +39,14 @@ export class Game{
         this.app.render();
         //console.timeEnd("render");
     };
-    levelChange(levelData:string){
-        this.level = new Level(game);
-        this.level.load(levelData);
+    levelChange(levelPath:string){
+        LevelGenereter.loadURL(this, levelPath).then((level)=>{
+            this.level = level;
+            this.start();
+        });
     }
 }
 
 
 let game = new Game();
-let req = new XMLHttpRequest();
-req.addEventListener('load', (e)=>{
-    //マップがダウンロードできたらゲームを始める
-    game.levelChange(req.responseText);
-    game.start();
-});
-req.open('GET', 'map.json', true);
-req.send(null);
+game.levelChange("map/1.json");

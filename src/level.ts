@@ -4,11 +4,12 @@ import {Game} from "./script";
 import {GameObject} from "./gameObject";
 import {Shape,Rectangle} from "./shape";
 import {Collision} from "./collision";
+import {Wall} from "./wall"
 
 export class Level extends GameObject{
     shape:Rectangle = new Rectangle(0, 0, 960, 540);
     collision:Collision;
-    view:PIXI.Container;
+    view:PIXI.Graphics;
 
     levelData:any;
     isLoad = false;
@@ -21,17 +22,16 @@ export class Level extends GameObject{
 
     countFrame = 0;
 
-    constructor(game: Game){
-        super(game);
-        this.view = new PIXI.Container();
+    constructor(public game: Game){
+        super();
+        this.view = new PIXI.Graphics();
         this.game.app.stage.addChild(this.view);
         this.collision = new Collision();
-    }
-    load(levelText: string){
     }
     save(){
     }
     update(){
+        this.view.clear();
         if(this.isGameSet == false){
             for(let object of this.gameObjectList){
                 object.update();

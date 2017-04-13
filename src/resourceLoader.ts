@@ -2,7 +2,7 @@ import "pixi.js";
 import _ = require('lodash');
 import * as URI from "urijs";
 
-export class Loader{
+export class ResourceLoader{
     ququeList:{path: string, callback: (texture:PIXI.Texture)=>void}[] = [];
     loadingList:{path: string, callback: (texture:PIXI.Texture)=>void}[] = [];
     constructor(){
@@ -51,7 +51,6 @@ export class Loader{
 
         for(let load of addList){
             PIXI.loader.add(load.path);
-            console.log(load.path);
         }
         return new Promise((resolve, reject)=>{
             PIXI.loader.load(()=>{

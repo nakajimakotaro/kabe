@@ -5,8 +5,8 @@ module.exports = {
         "script": "./src/script.ts",
     },
     output: {
-        path: __dirname,
-        filename: `public/[name].js`,
+        filename: "script.js",
+        path: __dirname + "/public/",
     },
     devtool: 'source-map',
     devServer: {
@@ -23,9 +23,9 @@ module.exports = {
     },
     plugins: [
         new CopyWebpackPlugin([
-            {from: 'src/index.html', to: 'public/index.html'},
-            {from: 'src/style.css',  to: 'public/style.css'},
-            {from: 'src/map',        to: 'public/map'},
+            {from: 'src/index.html', to: 'index.html'},
+            {from: 'src/style.css',  to: 'style.css'},
+            {from: 'src/map',        to: 'map'},
         ])
     ]
 };

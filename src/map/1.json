@@ -1,0 +1,22 @@
+{
+    "gameObject": [
+        {
+            "object": "Wall",
+            "shape": {
+                "type": "Rectangle",
+                "x": 100,
+                "y": 100,
+                "w": 300,
+                "h": 50
+            }
+        },
+        {
+            "object": "BallTee",
+            "shape": {
+                "type": "Point",
+                "x": 200,
+                "y": 400
+            }
+        }
+    ]
+}
