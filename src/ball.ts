@@ -14,6 +14,7 @@ export class Ball extends ViewObject{
         super.update();
         for(let collision of this.shape.collisionList){
             if(collision.owner instanceof Wall){
+                this.remove();
             }
         }
         this.move.y--;

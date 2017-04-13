@@ -47,4 +47,9 @@ export abstract class ViewObject extends GameObject{
             return false;
         }
     }
+
+    remove(){
+        super.remove();
+        this.game.level.collision.remove(this, this.shape);
+    }
 }
