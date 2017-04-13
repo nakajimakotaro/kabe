@@ -2,8 +2,9 @@ import PIXI = require('pixi.js');
 import {Game} from "./script";
 import {GameObject} from "./gameObject";
 import {Wall} from "./wall";
-import {Shape,Rectangle,Circle} from "./shape";
+import {Shape,Rectangle,Circle,Point} from "./shape";
 import {ViewObject} from "./viewObject";
+import {Ink} from "./ink";
 
 export class Ball extends ViewObject{
     constructor(public game:Game, public shape:Circle){
@@ -14,10 +15,11 @@ export class Ball extends ViewObject{
         super.update();
         for(let collision of this.shape.collisionList){
             if(collision.owner instanceof Wall){
+                this.game.level.addObject(new Ink(this.game, new Point(this.shape.x, collision.owner.shape.y + collision.owner.shape.height - 1)));
                 this.remove();
             }
         }
-        this.move.y--;
+        this.move.y -= 3;
         let view = this.game.level.view;
         view.beginFill(0x00ff00);
         view.drawCircle(
