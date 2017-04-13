@@ -2,49 +2,39 @@ import {Shape,Rectangle,Circle,Point} from "./shape";
 import _ = require('lodash');
 
 export class Collision{
-    list:{object:Object|null, shape:Shape, collisionList:Object[]|undefined}[] = [];
+    list: {owner:Object, shape:Shape}[] = [];
 
     constructor() {
     }
-    add(object:Object|null, shape:Shape, collisionList?:Object[]){
-        this.list.push({object:object, shape:shape, collisionList:collisionList});
+    add(owner:Object, shape:Shape){
+        this.list.push({shape: shape, owner: owner});
     }
-    remove(object:Object|null, shape:Shape, collisionList?:Object[]){
+    remove(owner:Object, shape:Shape){
         _.remove(this.list, (v)=>{
             return (
-            v.object === object &&
-            v.shape === shape &&
-            v.collisionList === collisionList
-            )
+                v.owner === owner &&
+                v.shape === shape);
         });
     }
     collision(shape:Shape){
-        let collisionList:{object:Object, shape:Shape}[] = [];
+        shape.collisionList = [];
         for(let a of this.list){
-            if(Collision.intersects(shape, a.shape) && a.object){
-                collisionList.push({object: a.object, shape: a.shape});
+            if(Collision.intersects(shape, a.shape)){
+                shape.collisionList.push(a);
             }
         }
-        return collisionList;
     }
     tick(){
-        for(let obj of this.list){
-            if(obj.collisionList == undefined){
-                continue;
-            }
-            obj.collisionList.length = 0;
+        for(let collision of this.list){
+            collision.shape.collisionList = [];
         }
         for(let x = 0; x < this.list.length; x++){
             const a = this.list[x];
             for (let y = x + 1; y < this.list.length; y++){
                 const b = this.list[y];
                 if(Collision.intersects(a.shape, b.shape)){
-                    if(a.collisionList && b.object){
-                        a.collisionList.push(b.object);
-                    }
-                    if(b.collisionList && a.object){
-                        b.collisionList.push(a.object);
-                    }
+                    a.shape.collisionList.push(b);
+                    b.shape.collisionList.push(a);
                 }
             }
         }

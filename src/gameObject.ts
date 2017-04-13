@@ -8,8 +8,6 @@ export abstract class GameObject{
     }
     update(){
     }
-    draw(renderer: PIXI.Graphics){
-    }
     remove(){
         this.game.level.removeQueue(this);
     }

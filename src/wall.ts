@@ -6,6 +6,7 @@ import {Shape,Rectangle} from "./shape";
 export class Wall extends GameObject{
     constructor(public game:Game, public shape:Rectangle){
         super();
+        this.game.level.collision.add(this, this.shape);
     }
     update(){
         let view = this.game.level.view;

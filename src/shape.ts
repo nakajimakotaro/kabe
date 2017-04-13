@@ -1,4 +1,6 @@
 export class Shape{
+    collisionList: {owner: Object|null, shape:Shape}[] = [];
+    owner: Object|null = null;
     constructor(
         public x:number,
         public y:number
