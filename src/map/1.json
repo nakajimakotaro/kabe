@@ -4,7 +4,7 @@
             "object": "Wall",
             "shape": {
                 "type": "Rectangle",
-                "x": 100,
+                "x": 300,
                 "y": 100,
                 "w": 300,
                 "h": 50

@@ -69,22 +69,22 @@ export class Collision{
     static RectRect(a:Rectangle, b:Rectangle):boolean{
         //TODO angle対応
         return (
-            (a.x < b.x + b.width ) &&
-            (a.x + a.width  > b.x) &&
-            (a.y < b.y + b.height) &&
-            (a.y + a.height > b.y));
+            (a.left() < b.right() ) &&
+            (a.right()  > b.left()) &&
+            (a.top() < b.bottom()) &&
+            (a.bottom() > b.top()));
     }
     static RectCircle(rect:Rectangle, cicle:Circle):boolean{
         //TODO angle対応
         return (
-            rect.x - cicle.r < cicle.x && rect.x + rect.width  + cicle.r > cicle.x &&
-            rect.y - cicle.r < cicle.y && rect.y + rect.height + cicle.r > cicle.y
-        ) || 
+            rect.left() - cicle.r < cicle.x && rect.right()   + cicle.r > cicle.x &&
+            rect.top()  - cicle.r < cicle.y && rect.bottom()  + cicle.r > cicle.y
+        ) ||
         (
-            Math.hypot(rect.x -              cicle.x, rect.y -               cicle.y) < cicle.r ||
-            Math.hypot(rect.x + rect.width - cicle.x, rect.y -               cicle.y) < cicle.r ||
-            Math.hypot(rect.x + rect.width - cicle.x, rect.y + rect.height - cicle.y) < cicle.r ||
-            Math.hypot(rect.x -              cicle.x, rect.y + rect.height - cicle.y) < cicle.r
+            Math.hypot(rect.left()  - cicle.x, rect.top()    - cicle.y) < cicle.r ||
+            Math.hypot(rect.left()  - cicle.x, rect.bottom() - cicle.y) < cicle.r ||
+            Math.hypot(rect.right() - cicle.x, rect.top()    - cicle.y) < cicle.r ||
+            Math.hypot(rect.right() - cicle.x, rect.bottom() - cicle.y) < cicle.r
         );
     }
     static PointPoint(a:Point, b:Point):boolean{
@@ -92,8 +92,8 @@ export class Collision{
     }
     static PointRectangle(point:Point, rect:Rectangle):boolean{
         //TODO angle対応
-        return (rect.x < point.x) && (rect.x + rect.width  > point.x) && 
-        (rect.y < point.y) && (rect.y + rect.height > point.y); 
+        return (rect.left() < point.x) && (rect.right()  > point.x) && 
+        (rect.top() < point.y) && (rect.bottom() > point.y); 
     }
     static PointCircle(point:Point, cicle:Circle):boolean{
         return Math.hypot(cicle.x - point.x, cicle.y - point.y) < cicle.r;

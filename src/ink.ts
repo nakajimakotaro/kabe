@@ -1,4 +1,3 @@
-
 import PIXI = require('pixi.js');
 import {Game} from "./script";
 import {GameObject} from "./gameObject";
@@ -16,6 +15,7 @@ export class Ink extends ViewObject{
     splashList: {shape:Circle, angle:number, speed:number}[] = [];
     constructor(public game:Game, public splashPoint:Point, wall:Wall){
         super();
+        console.log(splashPoint);
         this.game.level.collision.add(this, this.splashPoint);
         this.view = new PIXI.Graphics();
         this.game.level.view.addChild(this.view);
@@ -23,6 +23,7 @@ export class Ink extends ViewObject{
         let y = this.splashPoint.y;
         let width = 40;
         let height = 40;
+        //壁についたインクの当たり判定
         if(wall.shape.width < width / 2){
             x = wall.shape.x;
             width = wall.shape.width;
@@ -35,7 +36,7 @@ export class Ink extends ViewObject{
         }
 
         if(wall.shape.height < height / 2){
-            y = wall.shape.y;
+            y = wall.shape.top();
             height = wall.shape.height;
         }else if(splashPoint.y - height / 2 < wall.shape.top()){
             height = (splashPoint.y + height) - wall.shape.left();
@@ -45,21 +46,30 @@ export class Ink extends ViewObject{
             y = wall.shape.right() - height / 2;
         }
         this.shape = new Rectangle(x, y, width, height);
+        console.log(this.shape);
         const mask = new PIXI.Graphics();
-        mask.beginFill(0xffffff);
-        mask.drawRect(this.shape.left(), this.shape.top(), this.shape.width, this.shape.height);
+        mask.beginFill(0);
+        // mask.drawRect(this.shape.left(), this.shape.top(), this.shape.width, this.shape.height);
+        mask.drawRect(wall.shape.left(), wall.shape.top(), wall.shape.width, wall.shape.height);
         this.view.mask = mask;
-        this.inkCreate();
-        this.inkDraw();
+        this.splashCreate();
+        this.splashDraw();
     }
-    inkCreate(){
-        const createNum = 10;
+    splashCreate(){
         const maxSize = 10;
-        for(let i = 0;i < createNum;i++){
+        let inkVolume = 50;
+        while(inkVolume > 0){
+            let splashVolume = random(1, maxSize);
+            if(splashVolume < inkVolume){
+                inkVolume -= splashVolume;
+            }else{
+                splashVolume = inkVolume;
+                inkVolume = 0;
+            }
             const shape = new Circle(
                 this.splashPoint.x,
                 this.splashPoint.y,
-                random(0, maxSize)
+                splashVolume
             );
             const angle = random(0, Math.PI * 2);
             const speed = (maxSize - shape.r) + 5;
@@ -72,23 +82,10 @@ export class Ink extends ViewObject{
                 });
         }
     }
-    inkDraw(){
-        //関数
-        const hasOutWall = (splash)=>{
-            this.game.level.collision.collision(splash.shape);
-            for(let collision of splash.shape.collisionList){
-                if(collision.owner instanceof Wall){
-                    return false;
-                }
-            }
-            return true;
-        }
+    splashDraw(){
         this.view.beginFill(0x00ff00);
         for(let splash of this.splashList){
             for(let i = 0;i < 4;i++){
-                if(hasOutWall(splash)){
-                    break;
-                }
                 this.view.drawCircle(
                     splash.shape.x,
                     splash.shape.y,

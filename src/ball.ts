@@ -7,6 +7,9 @@ import {ViewObject} from "./viewObject";
 import {Ink} from "./ink";
 
 export class Ball extends ViewObject{
+
+    speed = 0;
+    
     constructor(public game:Game, public shape:Circle){
         super();
         this.game.level.collision.add(this, this.shape);
@@ -20,7 +23,8 @@ export class Ball extends ViewObject{
                 break;
             }
         }
-        this.move.y -= 4;
+        this.move.x += Math.cos(this.shape.angle) * this.speed;
+        this.move.y += Math.sin(this.shape.angle) * this.speed;
         let view = this.game.level.view;
         view.beginFill(0x00ff00);
         view.drawCircle(
@@ -28,5 +32,10 @@ export class Ball extends ViewObject{
             this.shape.y,
             this.shape.r,
         );
+    }
+
+    shot(angle:number, speed:number){
+        this.shape.angle = angle;
+        this.speed = speed;
     }
 }
