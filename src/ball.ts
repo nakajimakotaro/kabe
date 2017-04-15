@@ -20,7 +20,7 @@ export class Ball extends ViewObject{
                 break;
             }
         }
-        this.move.y -= 3;
+        this.move.y -= 4;
         let view = this.game.level.view;
         view.beginFill(0x00ff00);
         view.drawCircle(
