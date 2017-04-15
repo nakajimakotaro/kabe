@@ -6,6 +6,10 @@
   version "2.0.41"
   resolved "https://registry.yarnpkg.com/@types/jquery/-/jquery-2.0.41.tgz#b87ba051011f99edbe586d8f97282e7786e01a6d"
 
+"@types/lodash@^4.14.62":
+  version "4.14.62"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.62.tgz#8674f9861582148a60b7a89cb260f11378d11683"
+
 "@types/pixi.js@^4.4.2":
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/@types/pixi.js/-/pixi.js-4.4.2.tgz#6c031164f2aef3e005b2c8c727fe851aa77e5a20"
@@ -1256,7 +1260,7 @@ loader-utils@^1.0.2:
     emojis-list "^2.0.0"
     json5 "^0.5.0"
 
-lodash@^4.14.0, lodash@^4.17.2, lodash@^4.3.0:
+lodash@^4.14.0, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.3.0:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 

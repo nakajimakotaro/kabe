@@ -5,12 +5,14 @@
   "author": "nakajimakotaro <harusann2@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "lodash": "^4.17.4",
     "pixi.js": "^4.4.4",
     "stats.js": "^0.17.0",
     "urijs": "^1.18.10",
     "victor": "^1.1.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.62",
     "@types/pixi.js": "^4.4.2",
     "@types/stats.js": "^0.16.0",
     "@types/urijs": "^1.15.32",
