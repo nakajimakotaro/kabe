@@ -12,27 +12,69 @@ function random(min:number, max:number){
 
 export class Ink extends ViewObject{
     view:PIXI.Graphics;
-    splashList: {shape:Circle, angle:number}[] = [];
-    constructor(public game:Game, public shape:Point){
+    shape:Rectangle;
+    splashList: {shape:Circle, angle:number, speed:number}[] = [];
+    constructor(public game:Game, public splashPoint:Point, wall:Wall){
         super();
-        this.game.level.collision.add(this, this.shape);
+        this.game.level.collision.add(this, this.splashPoint);
         this.view = new PIXI.Graphics();
         this.game.level.view.addChild(this.view);
+        let x = this.splashPoint.x;
+        let y = this.splashPoint.y;
+        let width = 40;
+        let height = 40;
+        if(wall.shape.width < width / 2){
+            x = wall.shape.x;
+            width = wall.shape.width;
+        }else if(splashPoint.x - width / 2 < wall.shape.left()){
+            width = (splashPoint.x + width) - wall.shape.left();
+            x = wall.shape.left() + width / 2;
+        }else if(splashPoint.x + width / 2 < wall.shape.right()){
+            width = wall.shape.right() - (splashPoint.x - width);
+            x = wall.shape.right() - width / 2;
+        }
+
+        if(wall.shape.height < height / 2){
+            y = wall.shape.y;
+            height = wall.shape.height;
+        }else if(splashPoint.y - height / 2 < wall.shape.top()){
+            height = (splashPoint.y + height) - wall.shape.left();
+            y = wall.shape.left() + height / 2;
+        }else if(splashPoint.y + height / 2 < wall.shape.bottom()){
+            height = wall.shape.right() - (splashPoint.y - height);
+            y = wall.shape.right() - height / 2;
+        }
+        this.shape = new Rectangle(x, y, width, height);
+        const mask = new PIXI.Graphics();
+        mask.beginFill(0xffffff);
+        mask.drawRect(this.shape.left(), this.shape.top(), this.shape.width, this.shape.height);
+        this.view.mask = mask;
+        this.inkCreate();
         this.inkDraw();
     }
-    inkDraw(){
-        for(let i = 0;i < 30;i++){
+    inkCreate(){
+        const createNum = 10;
+        const maxSize = 10;
+        for(let i = 0;i < createNum;i++){
+            const shape = new Circle(
+                this.splashPoint.x,
+                this.splashPoint.y,
+                random(0, maxSize)
+            );
+            const angle = random(0, Math.PI * 2);
+            const speed = (maxSize - shape.r) + 5;
+
             this.splashList.push(
-                    {
-                        shape: new Circle(
-                            this.shape.x,
-                            this.shape.y - 8,
-                            Math.random() * 8
-                        ),
-                        angle: random(0, Math.PI * 2)
-                    });
+                {
+                    shape: shape,
+                    angle: angle,
+                    speed: speed,
+                });
         }
-        let hasOutWall = (splash)=>{
+    }
+    inkDraw(){
+        //関数
+        const hasOutWall = (splash)=>{
             this.game.level.collision.collision(splash.shape);
             for(let collision of splash.shape.collisionList){
                 if(collision.owner instanceof Wall){
@@ -42,26 +84,18 @@ export class Ink extends ViewObject{
             return true;
         }
         this.view.beginFill(0x00ff00);
-        this.view.drawRect(
-                this.shape.x - 10,
-                this.shape.y - 7,
-                20,
-                7
-                );
-        this.view.drawCircle(
-                this.shape.x,
-                this.shape.y - 10,
-                10
-                );
         for(let splash of this.splashList){
-            while(splash.shape.r > 2 && !hasOutWall(splash)){
+            for(let i = 0;i < 4;i++){
+                if(hasOutWall(splash)){
+                    break;
+                }
                 this.view.drawCircle(
-                        splash.shape.x,
-                        splash.shape.y,
-                        splash.shape.r
-                        );
-                splash.shape.x += Math.cos(splash.angle) * 8;
-                splash.shape.y += Math.sin(splash.angle) * 8;
+                    splash.shape.x,
+                    splash.shape.y,
+                    splash.shape.r
+                );
+                splash.shape.x += Math.cos(splash.angle) * splash.speed;
+                splash.shape.y += Math.sin(splash.angle) * splash.speed;
                 splash.shape.r *= random(0.55, 0.95);
             }
         }

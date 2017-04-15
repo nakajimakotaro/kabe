@@ -15,7 +15,7 @@ export class Ball extends ViewObject{
         super.update();
         for(let collision of this.shape.collisionList){
             if(collision.owner instanceof Wall){
-                this.game.level.addObject(new Ink(this.game, new Point(this.shape.x, collision.owner.shape.bottom() - 1)));
+                this.game.level.addObject(new Ink(this.game, new Point(this.shape.x, collision.owner.shape.bottom() - 1), collision.owner));
                 this.remove();
                 break;
             }
