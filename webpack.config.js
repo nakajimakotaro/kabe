@@ -1,4 +1,3 @@
-const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 module.exports = {
     entry: {
@@ -19,7 +18,6 @@ module.exports = {
     module: {
         loaders: [
             {test: /\.ts$/, loader: 'ts-loader'},
-            {test: /\.yaml/, loader: 'ts-loader'},
         ]
     },
     plugins: [

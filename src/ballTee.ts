@@ -19,20 +19,26 @@ export class BallTee extends GameObject{
             this.shape.y,
             1
         );
-        let canvas = this.game.app.view;
+        const canvas = this.game.app.view;
         //マウスとタッチイベントの追加
-        let onDown = (e)=>{
-            if(this.prevCreateTime + 500 > this.game.level.countFrame){
+        const onDown = (e)=>{
+            let nowTime = performance.now();
+            if(this.prevCreateTime + 500 > nowTime){
                 return;
+            }else{
+                this.prevCreateTime = nowTime;
             }
+
             const x = e.pageX - canvas.offsetLeft;
             const y = e.pageY - canvas.offsetTop;
             const height = (y - this.shape.y) * -1;
-            const width  = (x - this.shape.x);
-            let angle = Math.atan(height / width);
+            let width  = (x - this.shape.x);
+            console.log(`height: ${height}`);
+            console.log(`width: ${width}`);
+            let angle = Math.atan2(height, width);
             let speed = 5;
             this.ball.shot(angle, speed);
-            console.log('new');
+            console.log(angle);
             this.setBall();
         }
         canvas.addEventListener('mousedown', onDown);

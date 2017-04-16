@@ -24,7 +24,7 @@ export class Ball extends ViewObject{
             }
         }
         this.move.x += Math.cos(this.shape.angle) * this.speed;
-        this.move.y += Math.sin(this.shape.angle) * this.speed;
+        this.move.y += Math.sin(this.shape.angle) * this.speed * -1;
         let view = this.game.level.view;
         view.beginFill(0x00ff00);
         view.drawCircle(
