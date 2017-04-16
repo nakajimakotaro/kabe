@@ -11,7 +11,7 @@ export class Wall extends GameObject{
     }
     update(){
         let view = this.game.level.view;
-        view.beginFill(0xff0000);
+        view.beginFill(0x3E2723);
         view.drawRect(
             this.shape.left(),
             this.shape.top(),

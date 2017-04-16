@@ -11,6 +11,16 @@
             }
         },
         {
+            "object": "Wall",
+            "shape": {
+                "type": "Rectangle",
+                "x": 600,
+                "y": 500,
+                "w": 300,
+                "h": 50
+            }
+        },
+        {
             "object": "BallTee",
             "shape": {
                 "type": "Point",

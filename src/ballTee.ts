@@ -44,11 +44,42 @@ export class BallTee extends GameObject{
         canvas.addEventListener('mousedown', onDown);
     }
 
+    colorList = [
+        0xf44336,
+        0xE91E63,
+        0x9C27B0,
+        0x673AB7,
+        0x3F51B5,
+        0x2196F3,
+        0x03A9F4,
+        0x00BCD4,
+        0x009688,
+        0x4CAF50,
+        0x8BC34A,
+        0xCDDC39,
+        0xFFEB3B,
+        0xFFC107,
+        0xFF9800,
+        0xFF5722
+    ];
+    currColorIndex = 0;
+    nextColor():number{
+        this.currColorIndex++;
+        if(this.colorList.length == this.currColorIndex){
+            this.currColorIndex = 0;
+        }
+        return this.colorList[this.currColorIndex];
+    };
     setBall(){
-        this.ball = new Ball(this.game, new Circle(
-            this.shape.x,
-            this.shape.y,
-            10)
+
+        this.ball = new Ball(
+            this.game,
+            new Circle(
+                this.shape.x,
+                this.shape.y,
+                10
+            ),
+            this.nextColor()
         );
         this.game.level.addObject(this.ball);
     }

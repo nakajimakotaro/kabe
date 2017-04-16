@@ -13,7 +13,7 @@ export class Ink extends ViewObject{
     view:PIXI.Graphics;
     shape:Rectangle;
     splashList: {shape:Circle, angle:number, speed:number}[] = [];
-    constructor(public game:Game, public splashPoint:Point, wall:Wall){
+    constructor(public game:Game, public splashPoint:Point, wall:Wall, public color:number){
         super();
         console.log(splashPoint);
         this.game.level.collision.add(this, this.splashPoint);
@@ -49,15 +49,14 @@ export class Ink extends ViewObject{
         console.log(this.shape);
         const mask = new PIXI.Graphics();
         mask.beginFill(0);
-        // mask.drawRect(this.shape.left(), this.shape.top(), this.shape.width, this.shape.height);
         mask.drawRect(wall.shape.left(), wall.shape.top(), wall.shape.width, wall.shape.height);
         this.view.mask = mask;
         this.splashCreate();
         this.splashDraw();
     }
     splashCreate(){
-        const maxSize = 10;
-        let inkVolume = 50;
+        const maxSize = 12;
+        let inkVolume = 75;
         while(inkVolume > 0){
             let splashVolume = random(1, maxSize);
             if(splashVolume < inkVolume){
@@ -83,7 +82,7 @@ export class Ink extends ViewObject{
         }
     }
     splashDraw(){
-        this.view.beginFill(0x00ff00);
+        this.view.beginFill(this.color);
         for(let splash of this.splashList){
             for(let i = 0;i < 4;i++){
                 this.view.drawCircle(
@@ -93,7 +92,7 @@ export class Ink extends ViewObject{
                 );
                 splash.shape.x += Math.cos(splash.angle) * splash.speed;
                 splash.shape.y += Math.sin(splash.angle) * splash.speed;
-                splash.shape.r *= random(0.55, 0.95);
+                splash.shape.r *= random(0.75, 0.95);
             }
         }
     }
