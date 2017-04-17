@@ -1,9 +1,9 @@
 import PIXI = require('pixi.js');
 import {Game} from "./script";
 import {GameObject} from "./gameObject";
-import {Wall} from "./wall";
 import {Shape,Rectangle,Circle,Point} from "./shape";
 import {ViewObject} from "./viewObject";
+import {Wall} from "./wall";
 import {Ink} from "./ink";
 
 export class Ball extends ViewObject{
@@ -15,12 +15,23 @@ export class Ball extends ViewObject{
     }
     update(){
         super.update();
+        const wallColisionList:Wall[] = [];
+        const inkColisionList:Ink[] = [];
         for(let collision of this.shape.collisionList){
             if(collision.owner instanceof Wall){
-                this.game.level.addObject(new Ink(this.game, new Point(this.shape.x, this.shape.y), this, collision.owner, this.color));
-                this.remove();
-                break;
+                wallColisionList.push(collision.owner);
+            }else if(collision.owner instanceof Ink){
+                inkColisionList.push(collision.owner);
             }
+            console.log(collision.owner);
+        }
+        if(wallColisionList.length != 0 && inkColisionList.length != 0){
+            inkColisionList[0].ability(this, wallColisionList[0]);
+        }
+        if(wallColisionList.length != 0 && inkColisionList.length == 0){
+            this.game.level.addObject(new Ink(this.game, new Point(this.shape.x, this.shape.y), this, wallColisionList[0], this.color));
+            this.remove();
+            return;
         }
         this.move.x += Math.cos(this.shape.angle) * this.speed;
         this.move.y += Math.sin(this.shape.angle) * this.speed * -1;

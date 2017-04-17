@@ -53,6 +53,7 @@ export class Ink extends ViewObject{
         this.view.mask = mask;
         this.splashCreate();
         this.splashDraw();
+        this.game.level.collision.add(this, this.shape);
     }
     splashCreate(){
         const maxSize = 12;
@@ -99,7 +100,7 @@ export class Ink extends ViewObject{
         }
     }
     update(){
-        let debug = true;
+        let debug = false;
         if(debug){
             this.game.level.view.endFill();
             this.game.level.view.lineStyle(1, 0x00ff00);
@@ -110,5 +111,17 @@ export class Ink extends ViewObject{
             this.game.level.view.lineTo(this.shape.left(), this.shape.top());
             this.game.level.view.lineStyle(0, 0x00ff00);
         }
+    }
+
+    ability(ball:Ball, wall:Wall){
+        let xReverse = 1;
+        let yReverse = 1;
+        if(ball.shape.x < wall.shape.left() || ball.shape.x > wall.shape.right()){
+            xReverse = -1;
+        }else{
+            yReverse = -1;
+        }
+        let angle = Math.atan2(ball.moveAverage().y * -1 * yReverse, ball.moveAverage().x * xReverse);
+        ball.shot(angle, ball.speed);
     }
 }
