@@ -2,6 +2,7 @@ import PIXI = require('pixi.js');
 import {Game} from "./script";
 import {GameObject} from "./gameObject";
 import {Wall} from "./wall";
+import {Ball} from "./ball";
 import {Shape,Rectangle,Circle,Point} from "./shape";
 import {ViewObject} from "./viewObject";
 
@@ -12,8 +13,8 @@ function random(min:number, max:number){
 export class Ink extends ViewObject{
     view:PIXI.Graphics;
     shape:Rectangle;
-    splashList: {shape:Circle, angle:number, speed:number}[] = [];
-    constructor(public game:Game, public splashPoint:Point, wall:Wall, public color:number){
+    splashList: {shape:Circle, angle:number, speed:number, firstSpeed:{x:number, y:number}}[] = [];
+    constructor(public game:Game, public splashPoint:Point, public ball:Ball, wall:Wall, public color:number){
         super();
         console.log(splashPoint);
         this.game.level.collision.add(this, this.splashPoint);
@@ -71,12 +72,14 @@ export class Ink extends ViewObject{
             );
             const angle = random(0, Math.PI * 2);
             const speed = (maxSize - shape.r) + 5;
+            const firstSpeed = {x: this.ball.moveAverage().x, y: this.ball.moveAverage().y};
 
             this.splashList.push(
                 {
                     shape: shape,
                     angle: angle,
                     speed: speed,
+                    firstSpeed: firstSpeed,
                 });
         }
     }
@@ -89,14 +92,14 @@ export class Ink extends ViewObject{
                     splash.shape.y,
                     splash.shape.r
                 );
-                splash.shape.x += Math.cos(splash.angle) * splash.speed;
-                splash.shape.y += Math.sin(splash.angle) * splash.speed;
+                splash.shape.x += Math.cos(splash.angle) * splash.speed + splash.firstSpeed.x;
+                splash.shape.y += Math.sin(splash.angle) * splash.speed + splash.firstSpeed.y;
                 splash.shape.r *= random(0.75, 0.95);
             }
         }
     }
     update(){
-        let debug = false;
+        let debug = true;
         if(debug){
             this.game.level.view.endFill();
             this.game.level.view.lineStyle(1, 0x00ff00);
