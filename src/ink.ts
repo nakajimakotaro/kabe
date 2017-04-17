@@ -30,7 +30,7 @@ export class Ink extends ViewObject{
         }else if(splashPoint.x - width / 2 < wall.shape.left()){
             width = (splashPoint.x + width) - wall.shape.left();
             x = wall.shape.left() + width / 2;
-        }else if(splashPoint.x + width / 2 < wall.shape.right()){
+        }else if(splashPoint.x + width / 2 > wall.shape.right()){
             width = wall.shape.right() - (splashPoint.x - width);
             x = wall.shape.right() - width / 2;
         }
@@ -39,14 +39,13 @@ export class Ink extends ViewObject{
             y = wall.shape.top();
             height = wall.shape.height;
         }else if(splashPoint.y - height / 2 < wall.shape.top()){
-            height = (splashPoint.y + height) - wall.shape.left();
-            y = wall.shape.left() + height / 2;
-        }else if(splashPoint.y + height / 2 < wall.shape.bottom()){
-            height = wall.shape.right() - (splashPoint.y - height);
-            y = wall.shape.right() - height / 2;
+            height = (splashPoint.y + height) - wall.shape.top();
+            y = wall.shape.top() + height / 2;
+        }else if(splashPoint.y + height / 2 > wall.shape.bottom()){
+            height = wall.shape.bottom() - (splashPoint.y - height / 2);
+            y = wall.shape.bottom() - height / 2;
         }
         this.shape = new Rectangle(x, y, width, height);
-        console.log(this.shape);
         const mask = new PIXI.Graphics();
         mask.beginFill(0);
         mask.drawRect(wall.shape.left(), wall.shape.top(), wall.shape.width, wall.shape.height);
@@ -94,6 +93,19 @@ export class Ink extends ViewObject{
                 splash.shape.y += Math.sin(splash.angle) * splash.speed;
                 splash.shape.r *= random(0.75, 0.95);
             }
+        }
+    }
+    update(){
+        let debug = false;
+        if(debug){
+            this.game.level.view.endFill();
+            this.game.level.view.lineStyle(1, 0x00ff00);
+            this.game.level.view.moveTo(this.shape.left(), this.shape.top());
+            this.game.level.view.lineTo(this.shape.right(), this.shape.top());
+            this.game.level.view.lineTo(this.shape.right(), this.shape.bottom());
+            this.game.level.view.lineTo(this.shape.left(), this.shape.bottom());
+            this.game.level.view.lineTo(this.shape.left(), this.shape.top());
+            this.game.level.view.lineStyle(0, 0x00ff00);
         }
     }
 }
