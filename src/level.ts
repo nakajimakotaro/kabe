@@ -2,12 +2,13 @@ import PIXI = require('pixi.js');
 import _ = require('lodash');
 import {Game} from "./script";
 import {GameObject} from "./gameObject";
-import {Shape,Rectangle} from "./shape";
+import {Shape,Rectangle,Circle} from "./shape";
 import {Collision} from "./collision";
 import {Wall} from "./wall"
+import {Ball} from "./ball"
 
 export class Level extends GameObject{
-    shape:Rectangle = new Rectangle(0, 0, 960, 540);
+    shape:Rectangle;
     collision:Collision;
     view:PIXI.Graphics;
 
@@ -30,7 +31,31 @@ export class Level extends GameObject{
     }
     save(){
     }
+    // debugBall:Ball;
     update(){
+        // if(this.debugBall == undefined){
+            // this.debugBall = new Ball(this.game, new Circle(0, 0, 10), 0xff00ff);
+            // this.addObject(this.debugBall);
+            // //マウスとタッチイベントの追加
+            // const canvas = this.game.app.view;
+            // const onMove = (e)=>{
+                // const x = e.pageX - canvas.offsetLeft;
+                // const y = e.pageY - canvas.offsetTop;
+                // let isWallHit = false;
+                // for(let collision of this.debugBall.shape.collisionList){
+                    // if(collision instanceof Wall){
+                        // isWallHit = true;
+                    // }
+                // }
+                // console.log(this.debugBall.shape.collisionList);
+                // this.debugBall.setColor(isWallHit ? 0x00ff00 : 0xff00ff);
+                // this.debugBall.shape.x = x;
+                // this.debugBall.shape.y = y;
+                // this.debugBall.collisionAction = ()=>{};
+            // }
+            // canvas.addEventListener('mousemove', onMove);
+        // }
+
         this.view.clear();
         if(this.isGameSet == false){
             for(let object of this.gameObjectList){

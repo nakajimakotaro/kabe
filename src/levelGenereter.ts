@@ -59,12 +59,18 @@ function BallTeeCreate(game:Game, ballTeeData:IBallTee):BallTee{
     return new BallTee(game, shape);
 }
 
+interface ILevelConfig{
+    shape: IRectangle;
+}
+
 interface ILevel{
+    levelConfig: ILevelConfig;
     gameObject: Array<IWall|IBallTee>;
 }
 function levelCreate(game:Game, levelData:ILevel):Level{
     const level = new Level(game);
     game.level = level;
+    level.shape = rectangleCreate(game, levelData.levelConfig.shape);
     for(let gameObjectData of levelData.gameObject){
         switch(gameObjectData.object){
             case "Wall":

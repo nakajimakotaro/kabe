@@ -3,6 +3,7 @@ import {Game} from "./script";
 import {GameObject} from "./gameObject";
 import {Wall} from "./wall";
 import {Ball} from "./ball";
+import {Collision} from "./collision";
 import {Shape,Rectangle,Circle,Point} from "./shape";
 import {ViewObject} from "./viewObject";
 
@@ -16,10 +17,21 @@ export class Ink extends ViewObject{
     splashList: {shape:Circle, angle:number, speed:number, firstSpeed:{x:number, y:number}}[] = [];
     constructor(public game:Game, public splashPoint:Point, public ball:Ball, wall:Wall, public color:number){
         super();
-        console.log(splashPoint);
-        this.game.level.collision.add(this, this.splashPoint);
+
         this.view = new PIXI.Graphics();
+        const mask = new PIXI.Graphics();
+        this.view.mask = mask;
+        mask.beginFill(0);
+        mask.drawRect(wall.shape.left(), wall.shape.top(), wall.shape.width, wall.shape.height);
         this.game.level.view.addChild(this.view);
+
+
+        this.setShape(wall);
+        this.splashCreate();
+        this.splashDraw();
+    }
+
+    setShape(wall:Wall){
         let x = this.splashPoint.x;
         let y = this.splashPoint.y;
         let width = 40;
@@ -28,31 +40,26 @@ export class Ink extends ViewObject{
         if(wall.shape.width < width / 2){
             x = wall.shape.x;
             width = wall.shape.width;
-        }else if(splashPoint.x - width / 2 < wall.shape.left()){
-            width = (splashPoint.x + width) - wall.shape.left();
+        }else if(this.splashPoint.x - width / 2 < wall.shape.left()){
+            width = (this.splashPoint.x + width) - wall.shape.left();
             x = wall.shape.left() + width / 2;
-        }else if(splashPoint.x + width / 2 > wall.shape.right()){
-            width = wall.shape.right() - (splashPoint.x - width);
+        }else if(this.splashPoint.x + width / 2 > wall.shape.right()){
+            width = wall.shape.right() - (this.splashPoint.x - width);
             x = wall.shape.right() - width / 2;
         }
 
         if(wall.shape.height < height / 2){
             y = wall.shape.top();
             height = wall.shape.height;
-        }else if(splashPoint.y - height / 2 < wall.shape.top()){
-            height = (splashPoint.y + height) - wall.shape.top();
+        }else if(this.splashPoint.y - height / 2 < wall.shape.top()){
+            height = (this.splashPoint.y + height) - wall.shape.top();
             y = wall.shape.top() + height / 2;
-        }else if(splashPoint.y + height / 2 > wall.shape.bottom()){
-            height = wall.shape.bottom() - (splashPoint.y - height / 2);
+        }else if(this.splashPoint.y + height / 2 > wall.shape.bottom()){
+            height = wall.shape.bottom() - (this.splashPoint.y - height / 2);
             y = wall.shape.bottom() - height / 2;
         }
+
         this.shape = new Rectangle(x, y, width, height);
-        const mask = new PIXI.Graphics();
-        mask.beginFill(0);
-        mask.drawRect(wall.shape.left(), wall.shape.top(), wall.shape.width, wall.shape.height);
-        this.view.mask = mask;
-        this.splashCreate();
-        this.splashDraw();
         this.game.level.collision.add(this, this.shape);
     }
     splashCreate(){
@@ -87,20 +94,28 @@ export class Ink extends ViewObject{
     splashDraw(){
         this.view.beginFill(this.color);
         for(let splash of this.splashList){
-            for(let i = 0;i < 4;i++){
-                this.view.drawCircle(
-                    splash.shape.x,
-                    splash.shape.y,
-                    splash.shape.r
-                );
-                splash.shape.x += Math.cos(splash.angle) * splash.speed + splash.firstSpeed.x;
-                splash.shape.y += Math.sin(splash.angle) * splash.speed + splash.firstSpeed.y;
-                splash.shape.r *= random(0.75, 0.95);
-            }
+            this.view.drawCircle(
+                splash.shape.x,
+                splash.shape.y,
+                splash.shape.r
+            );
         }
     }
+    nextCount = 0;
+    splashNext(){
+        for(let splash of this.splashList){
+            splash.shape.x += Math.cos(splash.angle) * splash.speed + splash.firstSpeed.x;
+            splash.shape.y += Math.sin(splash.angle) * splash.speed + splash.firstSpeed.y;
+            splash.shape.r *= random(0.75, 0.95);
+        }
+        this.splashDraw();
+    }
     update(){
-        let debug = false;
+        if(this.game.level.countFrame % 3 == 0 && this.nextCount < 4){
+            this.splashNext();
+            this.nextCount++;
+        }
+        let debug = true;
         if(debug){
             this.game.level.view.endFill();
             this.game.level.view.lineStyle(1, 0x00ff00);
@@ -118,7 +133,8 @@ export class Ink extends ViewObject{
         let yReverse = 1;
         if(ball.shape.x < wall.shape.left() || ball.shape.x > wall.shape.right()){
             xReverse = -1;
-        }else{
+        }
+        if(ball.shape.y < wall.shape.top() || ball.shape.y > wall.shape.bottom()){
             yReverse = -1;
         }
         let angle = Math.atan2(ball.moveAverage().y * -1 * yReverse, ball.moveAverage().x * xReverse);

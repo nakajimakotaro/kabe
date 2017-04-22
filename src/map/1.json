@@ -1,4 +1,13 @@
 {
+    "levelConfig": [
+        "shape": {
+            "type": "Rectangle",
+            "x": 480,
+            "y": 270,
+            "w": 960,
+            "h": 540
+        }
+    ],
     "gameObject": [
         {
             "object": "Wall",
@@ -15,6 +24,16 @@
             "shape": {
                 "type": "Rectangle",
                 "x": 600,
+                "y": 300,
+                "w": 50,
+                "h": 300
+            }
+        },
+        {
+            "object": "Wall",
+            "shape": {
+                "type": "Rectangle",
+                "x": 300,
                 "y": 500,
                 "w": 300,
                 "h": 50

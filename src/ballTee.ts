@@ -2,13 +2,13 @@ import PIXI = require('pixi.js');
 import {Game} from "./script";
 import {GameObject} from "./gameObject";
 import {Shape,Rectangle,Circle,Point} from "./shape";
-import {Ball} from "./ball";
-
+import {Ball} from "./ball"; 
 export class BallTee extends GameObject{
     ball:Ball;
-    prevCreateTime = 0;
+    prevCreateFrame = 0;
     constructor(public game:Game, public shape:Point){
         super();
+        this.presetTexture();
         this.setBall();
     }
     update(){
@@ -22,23 +22,19 @@ export class BallTee extends GameObject{
         const canvas = this.game.app.view;
         //マウスとタッチイベントの追加
         const onDown = (e)=>{
-            let nowTime = performance.now();
-            if(this.prevCreateTime + 500 > nowTime){
+            if(this.prevCreateFrame + 10 > this.game.level.countFrame){
                 return;
             }else{
-                this.prevCreateTime = nowTime;
+                this.prevCreateFrame = this.game.level.countFrame;
             }
 
             const x = e.pageX - canvas.offsetLeft;
             const y = e.pageY - canvas.offsetTop;
             const height = (y - this.shape.y) * -1;
             let width  = (x - this.shape.x);
-            console.log(`height: ${height}`);
-            console.log(`width: ${width}`);
             let angle = Math.atan2(height, width);
             let speed = 5;
             this.ball.shot(angle, speed);
-            console.log(angle);
             this.setBall();
         }
         canvas.addEventListener('mousedown', onDown);
@@ -62,6 +58,16 @@ export class BallTee extends GameObject{
         0xFF9800,
         0xFF5722
     ];
+    presetTexture(){
+        for(let color of this.colorList){
+            let texture = 
+                new PIXI.Graphics()
+                    .beginFill(color)
+                    .drawCircle(0, 0, 10)
+                    .generateCanvasTexture(1);
+            this.game.resourceLoader.setResource('0x' + color.toString(16), texture);
+        }
+    }
     currColorIndex = 0;
     nextColor():number{
         this.currColorIndex++;

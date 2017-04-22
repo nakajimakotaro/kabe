@@ -4,7 +4,9 @@ import {Shape} from "./shape";
 
 export abstract class GameObject{
     abstract game:Game;
+    id:string;
     constructor(){
+        this.id = _.uniqueId();
     }
     update(){
     }

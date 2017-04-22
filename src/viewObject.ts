@@ -16,6 +16,9 @@ export abstract class ViewObject extends GameObject{
         if(this.hasScreenOut()){
             this.remove();
         }
+        this.moveOn();
+    }
+    moveOn(){
         this.shape.x += this.move.x;
         this.shape.y += this.move.y;
         this.moveHistory.shift();

@@ -3,20 +3,27 @@ import _ = require('lodash');
 import * as URI from "urijs";
 
 export class ResourceLoader{
-    ququeList:{path: string, callback: (texture:PIXI.Texture)=>void}[] = [];
-    loadingList:{path: string, callback: (texture:PIXI.Texture)=>void}[] = [];
+    ququeList:{name: string, callback: (texture:PIXI.Texture)=>void}[] = [];
+    loadingList:{name: string, callback: (texture:PIXI.Texture)=>void}[] = [];
+    textureList:{[key:string]: PIXI.Texture} = {};
     constructor(){
     }
-    load(path:string): Promise<PIXI.Texture>{
+    loadURL(path:string): Promise<PIXI.Texture>{
+        let normalizePath = new URI(path).normalize().toString();
+        return this.load(normalizePath);
+    }
+    load(name:string): Promise<PIXI.Texture>{
         return new Promise((resolve)=>{
-            let normalizePath = new URI(path).normalize().toString();
             //ロードする画像をキューに追加
-            this.ququeList.push({path: normalizePath, callback: (texture:PIXI.Texture)=>{
+            this.ququeList.push({name: name, callback: (texture:PIXI.Texture)=>{
                 //ロードが終了
                 resolve(texture);
             }});
             this.loadStart();
         });
+    }
+    isCache(name:string):boolean{
+        return this.textureList[name] != undefined;
     }
     private loadStart(){
         //ロード中なら何もしない
@@ -26,7 +33,7 @@ export class ResourceLoader{
         //何もロードしてなければロードを始める
         this.loadExec().then(()=>{
             for(let load of this.loadingList){
-                load.callback(PIXI.loader.resources[load.path].texture);
+                load.callback(this.textureList[load.name]);
             }
             this.loadingList = [];
             //ロードしている間にキューが溜まっているとロードを始める
@@ -35,13 +42,17 @@ export class ResourceLoader{
             }
         });
     }
+    setResource(name:string, resources:PIXI.Texture){
+        this.textureList[name] = resources;
+    }
+        
     private loadExec(): Promise<{}>{
         this.loadingList = this.ququeList;
         let addList = this.ququeList;
         this.ququeList = [];
-        addList = _.uniqBy(addList, 'path');
+        addList = _.uniqBy(addList, 'name');
         addList = addList.filter((e)=>{
-            return PIXI.loader.resources[e.path] == null;
+            return this.textureList[e.name] === undefined;
         });
         if(addList.length == 0){
             return new Promise((resolve)=>{
@@ -50,10 +61,13 @@ export class ResourceLoader{
         }
 
         for(let load of addList){
-            PIXI.loader.add(load.path);
+            PIXI.loader.add(load.name);
         }
         return new Promise((resolve, reject)=>{
             PIXI.loader.load(()=>{
+                for(let load of this.loadingList){
+                    this.textureList[load.name] = PIXI.loader.resources[load.name].texture;
+                }
                 resolve();
             });
         });
