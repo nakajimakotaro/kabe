@@ -1,10 +1,28 @@
 import {Shape,Rectangle,Circle,Point} from "./shape";
 import _ = require('lodash');
+import {Game} from "./script";
 
+class CollisionAreaNode {
+    child:CollisionAreaNode[] = new Array(4);
+    inObject:{object:CollisionObject, areaNode:CollisionAreaNode}[] = [];
+    constructor(public index:number, public shape:Rectangle){
+    }
+    isEnd(){
+        return (
+            this.child[0] === undefined &&
+            this.child[1] === undefined &&
+            this.child[2] === undefined &&
+            this.child[3] === undefined);
+    }
+}
+interface CollisionObject{
+    owner:Object;
+    shape:Shape;
+}
 export class Collision{
-    list: {owner:Object, shape:Shape}[] = [];
+    list: CollisionObject[] = [];
 
-    constructor() {
+    constructor(public game:Game){
     }
     add(owner:Object, shape:Shape){
         this.list.push({shape: shape, owner: owner});
@@ -28,57 +46,110 @@ export class Collision{
         for(let collision of this.list){
             collision.shape.collisionList = [];
         }
-        let root = new CollisionNode(this.game.level.shape.clone());
-        Collision.treeGenerate(root, this.list);
-    }
-    class CollisionNode {
-        child:CollisionNode[4] = new Array(4);
-        values:{object:Object, node:CollisionNode}[] = [];
-        constructor(public shape:Rectangle){
-        }
-        isEnd(){
-            return (
-                this.child[0] === undefined &&
-                this.child[1] === undefined &&
-                this.child[2] === undefined &&
-                this.child[3] === undefined);
-        }
-    }
-    private static treeGenerate(collisionList:Object[]){
-        function positioningNode(node:CollisionNode, freeObject:Object[]){
-            if(freeObject.length == 0){
-                return;
-            }
-            node.child[0] = new CollisionNode(new Rectangle(node.shape.left(), node.shape.top(), node.shape.width / 2, node.shape.height / 2));
-            node.child[1] = new CollisionNode(new Rectangle(node.shape.x,      node.shape.top(), node.shape.width / 2, node.shape.height / 2));
-            node.child[2] = new CollisionNode(new Rectangle(node.shape.left(), node.shape.y(),   node.shape.width / 2, node.shape.height / 2));
-            node.child[3] = new CollisionNode(new Rectangle(node.shape.x,      node.shape.y(),   node.shape.width / 2, node.shape.height / 2));
+        let root = new CollisionAreaNode(0, this.game.level.shape.clone());
+        root = this.treeGenerate(root, this.list);
+        Collision.roundTrip(root.child[0].inObject.map((e)=>e.object));
+        Collision.roundTrip(root.child[1].inObject.map((e)=>e.object));
+        Collision.roundTrip(root.child[2].inObject.map((e)=>e.object));
+        Collision.roundTrip(root.child[3].inObject.map((e)=>e.object));
 
-            let nextFreeNode = [];
-            for(let object of this.freeObject){
-                let addCount = 0;
-                for(let nodeChild of node.child){
-                    if(Collision.intersects(nodeChild.shape, object)){
-                        addCount++;
-                        nodeChild.values.push({object:Object, node:node});
+        for(let collision of this.list){
+            collision.shape.collisionList = _.uniq(collision.shape.collisionList);
+        }
+    }
+    private treeGenerate(root:CollisionAreaNode, list:CollisionObject[]){
+        let areaNode = root;
+        areaNode.child[0] = new CollisionAreaNode(1,
+            new Rectangle(
+                areaNode.shape.left() + (areaNode.shape.width / 4),
+                areaNode.shape.top() + (areaNode.shape.height / 4),
+                areaNode.shape.width / 2,
+                areaNode.shape.height / 2));
+        areaNode.child[1] = new CollisionAreaNode(2, 
+            new Rectangle(
+                areaNode.shape.x + (areaNode.shape.width / 4),
+                areaNode.shape.top() + (areaNode.shape.height / 4),
+                areaNode.shape.width / 2,
+                areaNode.shape.height / 2));
+        areaNode.child[2] = new CollisionAreaNode(3, 
+            new Rectangle(
+                areaNode.shape.left() + (areaNode.shape.width / 4),
+                areaNode.shape.y + (areaNode.shape.height / 4),
+                areaNode.shape.width / 2,
+                areaNode.shape.height / 2));
+        areaNode.child[3] = new CollisionAreaNode(4, 
+            new Rectangle(
+                areaNode.shape.x + (areaNode.shape.width / 4),
+                areaNode.shape.y + (areaNode.shape.height / 4),
+                areaNode.shape.width / 2,
+                areaNode.shape.height / 2));
+        let debug = true;
+        if(debug){
+            let color = [ 0xf44336, 0xE91E63, 0x9C27B0, 0x673AB7, 0x3F51B5, 0x2196F3, 0x03A9F4, 0x00BCD4, 0x009688, 0x4CAF50, 0x8BC34A, 0xCDDC39, 0xFFEB3B, 0xFFC107, 0xFF9800, 0xFF5722 ]; let count = 0; for(let areaNodeChild of areaNode.child){ count++; if(count == color.length){ count = 0; } this.game.level.view .beginFill(color[count], 0.3) .drawRect(areaNodeChild.shape.left(), areaNodeChild.shape.top(), areaNodeChild.shape.width, areaNodeChild.shape.height) .endFill(); count++; }
+        }
+        let nextNodeChild = new Map<CollisionAreaNode, {object:CollisionObject, areaNode:CollisionAreaNode}[]>();
+        nextNodeChild.set(areaNode.child[0], []);
+        nextNodeChild.set(areaNode.child[1], []);
+        nextNodeChild.set(areaNode.child[2], []);
+        nextNodeChild.set(areaNode.child[3], []);
+        for(let object of list){
+            let onlyInNode:CollisionAreaNode|null = null;
+            for(let areaNodeChild of areaNode.child){
+                if(Collision.intersects(areaNodeChild.shape, object.shape)){
+                    if(onlyInNode == null){
+                        onlyInNode = areaNodeChild;
+                    }else{
+                        onlyInNode = null;
+                        areaNodeChild.inObject.push({object: object, areaNode: areaNodeChild});
+                        break;
                     }
                 }
-                //境界線をまたいでいるオブジェクトはここで終わり
-                //またいでいなければ範囲をもう一度
-                if(addCount == 1){
-                    nextFreeNode.push(object);
-                }
-                Collision.treeGenerate(nextFreeNode);
+            }
+            if(onlyInNode != null){
+                onlyInNode.inObject.push({object: object, areaNode: onlyInNode});
+                //nextNodeChild.get(onlyInNode)!.push({object:object, areaNode: onlyInNode});
             }
         }
-
-        positioningNode(collisionList, this.list);
+        //再帰呼出し
+        return areaNode;
     }
-    private static roundTrip(collisionList:Object[]){
+    // private static treeGenerate(root:CollisionAreaNode, list:CollisionObject[]){
+    // if(freeObject.length == 0){
+    // return;
+    // }
+    // areaNode.child[0] = new CollisionAreaNode(0, new Rectangle(areaNode.shape.left(), areaNode.shape.top(), areaNode.shape.width / 2, areaNode.shape.height / 2));
+    // areaNode.child[1] = new CollisionAreaNode(1, new Rectangle(areaNode.shape.x,      areaNode.shape.top(), areaNode.shape.width / 2, areaNode.shape.height / 2));
+    // areaNode.child[2] = new CollisionAreaNode(2, new Rectangle(areaNode.shape.left(), areaNode.shape.y,   areaNode.shape.width / 2, areaNode.shape.height / 2));
+    // areaNode.child[3] = new CollisionAreaNode(3, new Rectangle(areaNode.shape.x,      areaNode.shape.y,   areaNode.shape.width / 2, areaNode.shape.height / 2));
+
+    // //境界線をまたいでいるオブジェクトはここで終わり
+    // //またいでいなければ範囲をもう一度
+    // let nextFreeObjectMap = new Map<0|1|2|3, CollisionObject[]>();
+    // nextFreeObjectMap.set(0, []);
+    // nextFreeObjectMap.set(1, []);
+    // nextFreeObjectMap.set(2, []);
+    // nextFreeObjectMap.set(3, []);
+    // for(let object of freeObject){
+    // for(let i = 0; i < 4; i++){
+    // let areaNodeChild = areaNode.child[i];
+    // if(Collision.intersects(areaNodeChild.shape, object.shape)){
+    // areaNodeChild.inObject.push({object: object, areaNode: areaNodeChild});
+    // nextFreeObjectMap.get(i as 0|1|2|3)!.push(object);
+    // }
+    // }
+    // }
+    // for(let i = 0; i < 4; i++){
+    // let areaNodeChild = areaNode.child[i];
+    // let nextFreeObjectList = nextFreeObjectMap.get(i as 0|1|2|3)!;
+    // positioningNode(areaNodeChild, nextFreeObjectList);
+    // }
+    // positioningNode(root, list);
+    // }
+    private static roundTrip(collisionList:CollisionObject[]){
         for(let x = 0; x < collisionList.length; x++){
-            const a = this.list[x];
+            const a = collisionList[x];
             for(let y = x + 1; y < collisionList.length; y++){
-                const b = this.list[y];
+                const b = collisionList[y];
                 if(Collision.intersects(a.shape, b.shape)){
                     a.shape.collisionList.push(b);
                     b.shape.collisionList.push(a);

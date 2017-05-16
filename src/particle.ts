@@ -12,14 +12,16 @@ function random(min:number, max:number):number{
 export interface Firework{
     type:"firework",
     color:number,
-    shape:Circle,
-    posRandom?:{xmin:number, xmax:number, ymin:number, ymax:number},
-    sparkNum:number,
-    initialVelocity?:{x:number, y:number},
-    randomVelocity?:{xmin:number, xmax:number, ymin:number, ymax:number},
-    friction:{x:number, y:number},
-    endTime:number,
-    gravity: {x:number, y:number},
+    shape:Circle,   //円の形
+    posRandom?:{xmin:number, xmax:number, ymin:number, ymax:number},    //ドットの場所のランダム性
+    sparkNum:number,    //パーティクルのドットの作る数
+    initialVelocity?:{x:number, y:number},      //初速
+    randomVelocity?:{xmin:number, xmax:number, ymin:number, ymax:number}, //速度のランダム性
+    generateFrequency?:number,      //0以外にするとそのミリ秒ずつこのパーティクルを発生させる
+    randomgenerateFrequency?:number,    //頻度のランダム性
+    friction:{x:number, y:number},      //摩擦
+    endTime:number,     //endTimeミリ秒たつとに消える
+    gravity: {x:number, y:number},  //重力
 }
 
 export class Particle extends ViewObject{
@@ -31,11 +33,13 @@ export class Particle extends ViewObject{
         this.shape.x = config.shape.x;
         this.shape.y = config.shape.y;
 
-        config.posRandom       = config.posRandom ? config.posRandom: {xmin: 0, xmax: 0, ymin: 0, ymax: 0};
-        config.initialVelocity = config.initialVelocity ? config.initialVelocity : {x: 0, y: 0};
-        config.randomVelocity  = config.randomVelocity ? config.randomVelocity : {xmin: 0, xmax: 0, ymin: 0, ymax: 0} ;
-        config.gravity         = config.gravity ? config.gravity : {x:0, y:0};
-        config.friction         = config.friction ? config.friction : {x:0, y:0};
+        config.posRandom                = config.posRandom ? config.posRandom: {xmin: 0, xmax: 0, ymin: 0, ymax: 0};
+        config.initialVelocity          = config.initialVelocity ? config.initialVelocity : {x: 0, y: 0};
+        config.randomVelocity           = config.randomVelocity ? config.randomVelocity : {xmin: 0, xmax: 0, ymin: 0, ymax: 0} ;
+        config.generateFrequency        = config.generateFrequency ? config.generateFrequency : 0;
+        config.randomgenerateFrequency  = config.randomgenerateFrequency ? config.randomgenerateFrequency : 0;
+        config.gravity                  = config.gravity ? config.gravity : {x:0, y:0};
+        config.friction                 = config.friction ? config.friction : {x:0, y:0};
 
         for(let i = 0; i < config.sparkNum;i++){
             let shape:Circle = new Circle(

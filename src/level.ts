@@ -27,7 +27,7 @@ export class Level extends GameObject{
         super();
         this.view = new PIXI.Graphics();
         this.game.app.stage.addChild(this.view);
-        this.collision = new Collision();
+        this.collision = new Collision(this.game);
     }
     save(){
     }

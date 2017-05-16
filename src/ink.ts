@@ -115,7 +115,7 @@ export class Ink extends ViewObject{
             this.splashNext();
             this.nextCount++;
         }
-        let debug = true;
+        let debug = false;
         if(debug){
             this.game.level.view.endFill();
             this.game.level.view.lineStyle(1, 0x00ff00);
