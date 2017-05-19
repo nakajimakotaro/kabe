@@ -47,30 +47,23 @@ export class Collision {
             collision.shape.collisionList = [];
         }
         let root = new CollisionAreaNode(0, this.game.level.shape.clone());
-        Collision.treeGenerate(root, this.list, 20, this.game);
-        Collision.treeProcess(root);
-
-        for (let collision of this.list) {
-            collision.shape.collisionList = _.uniq(collision.shape.collisionList);
-        }
+        //Collision.treeGenerate(root, this.list, 5, this.game);
+        //Collision.treeProcess(root);
+        Collision.roundTrip(this.list)
     }
     private static treeProcess(tree: CollisionAreaNode, collisionStack: CollisionObject[] = []) {
-        if (tree.isEnd()) {
-            return;
-        }
-
+        //同じエリアでの当たり判定
+        Collision.roundTrip(tree.inObject.map((e) => e.object));
+        //上位エリアとの当たり判定
+        Collision.roundTrip2(collisionStack, tree.inObject.map((e) => e.object));
+        //現在のエリアをstackに追加する
+        let stack = collisionStack.concat(tree.inObject.map((e) => e.object));
+        //下位エリアでの当たり判定
         for (let node of tree.child) {
-            Collision.roundTrip(node.inObject.map((e) => e.object));
-            Collision.roundTrip2(collisionStack, node.inObject.map((e) => e.object));
-        }
-        for (let node of tree.child) {
-            collisionStack = collisionStack.concat(node.inObject.map((e) => e.object));
-        }
-        for (let node of tree.child) {
-            Collision.treeProcess(node, collisionStack);
-        }
-        for (let node of tree.child) {
-            collisionStack.length = collisionStack.length - node.inObject.length;
+            if (node.isEnd()) {
+                continue;
+            }
+            Collision.treeProcess(node, stack);
         }
     }
     private static treeGenerate(root: CollisionAreaNode, list: CollisionObject[], count: number, game: Game) {
@@ -124,20 +117,24 @@ export class Collision {
         nextNodeChild.set(areaNode.child[2], []);
         nextNodeChild.set(areaNode.child[3], []);
         for (let object of list) {
-            let onlyInNode: CollisionAreaNode | null = null;
+            let onlyInArea: CollisionAreaNode | null = null;
             for (let areaNodeChild of areaNode.child) {
                 if (Collision.intersects(areaNodeChild.shape, object.shape)) {
-                    if (onlyInNode == null) {
-                        onlyInNode = areaNodeChild;
+                    if (onlyInArea == null) {
+                        //エリアが被っていなければ
+                        onlyInArea = areaNodeChild;
                     } else {
-                        onlyInNode = null;
-                        areaNodeChild.inObject.push({ object: object, areaNode: areaNodeChild });
+                        onlyInArea = null;
+                        //エリアにかぶっていれば現在のノードに入れる
+                        areaNode.inObject.push({ object: object, areaNode: areaNode });
                         break;
                     }
                 }
             }
-            if (onlyInNode != null) {
-                nextNodeChild.get(onlyInNode)!.push(object);
+            //複数のエリアに被っていなければ
+            if (onlyInArea != null) {
+                //更に中のエリア入れる
+                nextNodeChild.get(onlyInArea)!.push(object);
             }
         }
         for (let [areaNode, objectList] of nextNodeChild) {
@@ -145,47 +142,11 @@ export class Collision {
                 Collision.treeGenerate(areaNode, objectList, count - 1, game);
             }
         }
-
-        //再帰呼出し
-        return areaNode;
+        return;
     }
-    // private static treeGenerate(root:CollisionAreaNode, list:CollisionObject[]){
-    // if(freeObject.length == 0){
-    // return;
-    // }
-    // areaNode.child[0] = new CollisionAreaNode(0, new Rectangle(areaNode.shape.left(), areaNode.shape.top(), areaNode.shape.width / 2, areaNode.shape.height / 2));
-    // areaNode.child[1] = new CollisionAreaNode(1, new Rectangle(areaNode.shape.x,      areaNode.shape.top(), areaNode.shape.width / 2, areaNode.shape.height / 2));
-    // areaNode.child[2] = new CollisionAreaNode(2, new Rectangle(areaNode.shape.left(), areaNode.shape.y,   areaNode.shape.width / 2, areaNode.shape.height / 2));
-    // areaNode.child[3] = new CollisionAreaNode(3, new Rectangle(areaNode.shape.x,      areaNode.shape.y,   areaNode.shape.width / 2, areaNode.shape.height / 2));
 
-    // //境界線をまたいでいるオブジェクトはここで終わり
-    // //またいでいなければ範囲をもう一度
-    // let nextFreeObjectMap = new Map<0|1|2|3, CollisionObject[]>();
-    // nextFreeObjectMap.set(0, []);
-    // nextFreeObjectMap.set(1, []);
-    // nextFreeObjectMap.set(2, []);
-    // nextFreeObjectMap.set(3, []);
-    // for(let object of freeObject){
-    // for(let i = 0; i < 4; i++){
-    // let areaNodeChild = areaNode.child[i];
-    // if(Collision.intersects(areaNodeChild.shape, object.shape)){
-    // areaNodeChild.inObject.push({object: object, areaNode: areaNodeChild});
-    // nextFreeObjectMap.get(i as 0|1|2|3)!.push(object);
-    // }
-    // }
-    // }
-    // for(let i = 0; i < 4; i++){
-    // let areaNodeChild = areaNode.child[i];
-    // let nextFreeObjectList = nextFreeObjectMap.get(i as 0|1|2|3)!;
-    // positioningNode(areaNodeChild, nextFreeObjectList);
-    // }
-    // positioningNode(root, list);
-    // }
     //総当り
     private static roundTrip(collisionList: CollisionObject[]) {
-        if (!Array.isArray(collisionList)){
-            return;
-        }
         for (let x = 0; x < collisionList.length; x++) {
             const a = collisionList[x];
             for (let y = x + 1; y < collisionList.length; y++) {
@@ -200,9 +161,6 @@ export class Collision {
     //AとBの総当り
     //Aの要素同士では当たり判定を取らない(Bも同じ)
     private static roundTrip2(collisionListA: CollisionObject[], collisionListB: CollisionObject[]) {
-        if (!Array.isArray(collisionListA) || !Array.isArray(collisionListB)){
-            return;
-        }
         for (let a of collisionListA) {
             for (let b of collisionListB) {
                 if (Collision.intersects(a.shape, b.shape)) {
@@ -249,16 +207,28 @@ export class Collision {
     }
     static RectCircle(rect: Rectangle, cicle: Circle): boolean {
         //TODO angle対応
-        return (
-            rect.left() - cicle.r < cicle.x && rect.right() + cicle.r > cicle.x &&
-            rect.top() - cicle.r < cicle.y && rect.bottom() + cicle.r > cicle.y
-        ) ||
-            (
-                Math.hypot(rect.left() - cicle.x, rect.top() - cicle.y) < cicle.r ||
-                Math.hypot(rect.left() - cicle.x, rect.bottom() - cicle.y) < cicle.r ||
-                Math.hypot(rect.right() - cicle.x, rect.top() - cicle.y) < cicle.r ||
-                Math.hypot(rect.right() - cicle.x, rect.bottom() - cicle.y) < cicle.r
-            );
+        // return (
+        //        rect.left() - cicle.r < cicle.x && rect.right() + cicle.r > cicle.x &&
+        //         rect.top() - cicle.r < cicle.y && rect.bottom() + cicle.r > cicle.y
+        //     ) || (
+        //             Math.hypot(rect.left() - cicle.x, rect.top() - cicle.y) < cicle.r ||
+        //             Math.hypot(rect.left() - cicle.x, rect.bottom() - cicle.y) < cicle.r ||
+        //              Math.hypot(rect.right() - cicle.x, rect.top() - cicle.y) < cicle.r ||
+        //              Math.hypot(rect.right() - cicle.x, rect.bottom() - cicle.y) < cicle.r
+        //          );
+        let rangeX = 0, rangeY = 0;
+        if (rect.left() > cicle.x) {
+            rangeX = rect.left() - cicle.x;
+        } else if (rect.right() < cicle.x) {
+            rangeX = cicle.x - rect.right();
+        }
+        if (rect.top() > cicle.y) {
+            rangeY = rect.top() - cicle.y;
+        } else if (rect.bottom() < cicle.y) {
+            rangeY = cicle.y - rect.bottom();
+        }
+        return Math.hypot(rangeX, rangeY) < cicle.r;
+
     }
     static PointPoint(a: Point, b: Point): boolean {
         return a.x == b.x && a.y == b.y;

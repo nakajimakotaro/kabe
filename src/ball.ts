@@ -1,59 +1,67 @@
 import PIXI = require('pixi.js');
-import {Game} from "./script";
-import {GameObject} from "./gameObject";
-import {Shape,Rectangle,Circle,Point} from "./shape";
-import {ViewObject} from "./viewObject";
-import {Wall} from "./wall";
-import {Ink} from "./ink";
-import {Particle} from "./particle";
+import { Game } from "./script";
+import { GameObject } from "./gameObject";
+import { Shape, Rectangle, Circle, Point } from "./shape";
+import { ViewObject } from "./viewObject";
+import { Wall } from "./wall";
+import { Ink } from "./ink";
+import { Particle } from "./particle";
+import * as _ from "lodash";
 
-export class Ball extends ViewObject{
+export class Ball extends ViewObject {
 
     speed = 0;
-    sprite:PIXI.Sprite;
-    constructor(public game:Game, public shape:Circle, public color:number){
+    sprite: PIXI.Sprite;
+    constructor(public game: Game, public shape: Circle, public color: number) {
         super();
         this.sprite = new PIXI.Sprite(PIXI.Texture.EMPTY);
         this.game.level.view.addChild(this.sprite);
         this.setColor(color);
         this.game.level.collision.add(this, this.shape);
     }
-    setColor(color:number){
+    setColor(color: number) {
         this.setSprite('0x' + color.toString(16));
     }
-    setSprite(path:string){
+    setSprite(path: string) {
         this.game.resourceLoader.load(path).then(
-            (texture:PIXI.Texture)=>{
+            (texture: PIXI.Texture) => {
                 this.sprite.texture = texture;
             });
     }
+    collisionHistory: Object[][] = new Array(10).fill(0).map(() => []);
     collisionActionFrame = 0;
-    update(){
+    update() {
         super.update();
 
         this.move.x += Math.cos(this.shape.angle) * this.speed;
         this.move.y += Math.sin(this.shape.angle) * this.speed * -1;
-        if(this.shape.collisionList.length != 0 && this.collisionActionFrame + 10 < this.game.level.countFrame){
-            this.collisionAction();
-            this.collisionActionFrame = this.game.level.countFrame;
+        for (let objectList of this.collisionHistory) {
+            for (let history of objectList) {
+                _.remove(this.shape.collisionList, (e) => {
+                    return e === history;
+                });
+            }
         }
+        this.collisionHistory.shift();
+        this.collisionHistory.push(this.shape.collisionList.slice());
+        this.collisionAction();
     }
-    collisionAction(){
-        const wallColisionList:Wall[] = [];
-        const inkColisionList:Ink[] = [];
-        for(let collision of this.shape.collisionList){
-            if(collision.owner instanceof Wall){
+    collisionAction() {
+        const wallColisionList: Wall[] = [];
+        const inkColisionList: Ink[] = [];
+        for (let collision of this.shape.collisionList) {
+            if (collision.owner instanceof Wall) {
                 wallColisionList.push(collision.owner);
-            }else if(collision.owner instanceof Ink){
+            } else if (collision.owner instanceof Ink) {
                 inkColisionList.push(collision.owner);
             }
         }
         // console.log(this.shape.collisionList);
-        if(wallColisionList.length != 0 && inkColisionList.length != 0){
+        if (wallColisionList.length != 0 && inkColisionList.length != 0) {
             console.log("インクにぶつかった");
             inkColisionList[0].ability(this, wallColisionList[0]);
         }
-        if(wallColisionList.length != 0 && inkColisionList.length == 0){
+        if (wallColisionList.length != 0 && inkColisionList.length == 0) {
             console.log("壁にぶつかった");
             this.game.level.addObject(new Ink(this.game, new Point(this.shape.x, this.shape.y), this, wallColisionList[0], this.color));
             this.game.level.addObject(new Particle(this.game, {
@@ -65,21 +73,21 @@ export class Ball extends ViewObject{
                 ),
                 posRandom: {
                     xmin: -10,
-                    xmax:  10,
+                    xmax: 10,
                     ymin: -10,
-                    ymax:  10,
+                    ymax: 10,
                 },
                 color: this.color,
                 sparkNum: 20,
                 initialVelocity: {
-                    x:this.moveAverage().x,
-                    y:this.moveAverage().y,
+                    x: this.moveAverage().x,
+                    y: this.moveAverage().y,
                 },
                 randomVelocity: {
                     xmin: -10,
-                    xmax:  10,
+                    xmax: 10,
                     ymin: -5,
-                    ymax:  10,
+                    ymax: 10,
                 },
                 friction: {
                     x: 0.98,
@@ -95,17 +103,17 @@ export class Ball extends ViewObject{
             this.remove();
         }
     }
-    moveOn(){
+    moveOn() {
         super.moveOn();
         this.sprite.x = this.shape.x - this.shape.r;
         this.sprite.y = this.shape.y - this.shape.r;
     }
-    remove(){
+    remove() {
         super.remove();
         this.game.level.view.removeChild(this.sprite);
     }
 
-    shot(angle:number, speed:number){
+    shot(angle: number, speed: number) {
         this.shape.angle = angle;
         this.speed = speed;
     }
