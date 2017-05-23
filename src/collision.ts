@@ -47,9 +47,9 @@ export class Collision {
             collision.shape.collisionList = [];
         }
         let root = new CollisionAreaNode(0, this.game.level.shape.clone());
-        //Collision.treeGenerate(root, this.list, 5, this.game);
-        //Collision.treeProcess(root);
-        Collision.roundTrip(this.list)
+        Collision.treeGenerate(root, this.list, 5, this.game);
+        Collision.treeProcess(root);
+        //Collision.roundTrip(this.list)
     }
     private static treeProcess(tree: CollisionAreaNode, collisionStack: CollisionObject[] = []) {
         //同じエリアでの当たり判定

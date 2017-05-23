@@ -14,10 +14,20 @@ export class Ball extends ViewObject {
     sprite: PIXI.Sprite;
     constructor(public game: Game, public shape: Circle, public color: number) {
         super();
+        console.time("ball");
+        console.time("sprite");
         this.sprite = new PIXI.Sprite(PIXI.Texture.EMPTY);
+        console.timeEnd("sprite");
+        console.time("viewadd");
         this.game.level.view.addChild(this.sprite);
+        console.timeEnd("viewadd");
+        console.time("color");
         this.setColor(color);
+        console.timeEnd("color");
+        console.time("collisionadd");
         this.game.level.collision.add(this, this.shape);
+        console.timeEnd("collisionadd");
+        console.timeEnd("ball");
     }
     setColor(color: number) {
         this.setSprite('0x' + color.toString(16));

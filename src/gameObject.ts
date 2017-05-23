@@ -13,5 +13,4 @@ export abstract class GameObject{
     remove(){
         this.game.level.removeQueue(this);
     }
-
 }
