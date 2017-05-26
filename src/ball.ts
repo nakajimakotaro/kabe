@@ -1,4 +1,5 @@
 import PIXI = require('pixi.js');
+import Matter = require("matter-js");
 import { Game } from "./script";
 import { GameObject } from "./gameObject";
 import { Shape, Rectangle, Circle, Point } from "./shape";
@@ -12,22 +13,12 @@ export class Ball extends ViewObject {
 
     speed = 0;
     sprite: PIXI.Sprite;
-    constructor(public game: Game, public shape: Circle, public color: number) {
+    constructor(public game: Game, public body: Matter.Body, public color: number) {
         super();
-        console.time("ball");
-        console.time("sprite");
         this.sprite = new PIXI.Sprite(PIXI.Texture.EMPTY);
-        console.timeEnd("sprite");
-        console.time("viewadd");
         this.game.level.view.addChild(this.sprite);
-        console.timeEnd("viewadd");
-        console.time("color");
         this.setColor(color);
-        console.timeEnd("color");
-        console.time("collisionadd");
-        this.game.level.collision.add(this, this.shape);
-        console.timeEnd("collisionadd");
-        console.timeEnd("ball");
+        //this.game.level.collision.add(this, this.body);
     }
     setColor(color: number) {
         this.setSprite('0x' + color.toString(16));
@@ -43,29 +34,20 @@ export class Ball extends ViewObject {
     update() {
         super.update();
 
-        this.move.x += Math.cos(this.shape.angle) * this.speed;
-        this.move.y += Math.sin(this.shape.angle) * this.speed * -1;
-        for (let objectList of this.collisionHistory) {
-            for (let history of objectList) {
-                _.remove(this.shape.collisionList, (e) => {
-                    return e === history;
-                });
-            }
-        }
-        this.collisionHistory.shift();
-        this.collisionHistory.push(this.shape.collisionList.slice());
+        this.move.x += Math.cos(this.body.angle) * this.speed;
+        this.move.y += Math.sin(this.body.angle) * this.speed * -1;
         this.collisionAction();
     }
     collisionAction() {
         const wallColisionList: Wall[] = [];
         const inkColisionList: Ink[] = [];
-        for (let collision of this.shape.collisionList) {
-            if (collision.owner instanceof Wall) {
-                wallColisionList.push(collision.owner);
-            } else if (collision.owner instanceof Ink) {
-                inkColisionList.push(collision.owner);
-            }
-        }
+        //for (let collision of this.shape.collisionList) {
+        //    if (collision.owner instanceof Wall) {
+        //        wallColisionList.push(collision.owner);
+        //    } else if (collision.owner instanceof Ink) {
+        //        inkColisionList.push(collision.owner);
+        //    }
+        //}
         // console.log(this.shape.collisionList);
         if (wallColisionList.length != 0 && inkColisionList.length != 0) {
             console.log("インクにぶつかった");
@@ -73,12 +55,12 @@ export class Ball extends ViewObject {
         }
         if (wallColisionList.length != 0 && inkColisionList.length == 0) {
             console.log("壁にぶつかった");
-            this.game.level.addObject(new Ink(this.game, new Point(this.shape.x, this.shape.y), this, wallColisionList[0], this.color));
+            this.game.level.addObject(new Ink(this.game, new Point(this.body.position.x, this.body.position.y), this, wallColisionList[0], this.color));
             this.game.level.addObject(new Particle(this.game, {
                 type: "firework",
                 shape: new Circle(
-                    this.shape.x,
-                    this.shape.y,
+                    this.body.position.x,
+                    this.body.position.y,
                     3,
                 ),
                 posRandom: {
@@ -115,8 +97,8 @@ export class Ball extends ViewObject {
     }
     moveOn() {
         super.moveOn();
-        this.sprite.x = this.shape.x - this.shape.r;
-        this.sprite.y = this.shape.y - this.shape.r;
+        this.sprite.x = this.body.position.x - this.sprite.width / 2;
+        this.sprite.y = this.body.position.y - this.sprite.height / 2;
     }
     remove() {
         super.remove();
@@ -124,7 +106,7 @@ export class Ball extends ViewObject {
     }
 
     shot(angle: number, speed: number) {
-        this.shape.angle = angle;
+        this.body.angle = angle;
         this.speed = speed;
     }
 }

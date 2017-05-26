@@ -1,10 +1,11 @@
 import _ = require('lodash');
+import Matter = require('matter-js');
 import {Game} from "./script";
 import {GameObject} from "./gameObject";
 import {Shape} from "./shape";
 
 export abstract class ViewObject extends GameObject{
-    abstract shape:Shape;
+    abstract body:Matter.Body;
     move = {x: 0, y: 0};
     moveHistory:{x: number, y: number}[]; //30フレーム前までの移動履歴
 
@@ -19,8 +20,8 @@ export abstract class ViewObject extends GameObject{
         this.moveOn();
     }
     moveOn(){
-        this.shape.x += this.move.x;
-        this.shape.y += this.move.y;
+        this.body.position.x += this.move.x;
+        this.body.position.y += this.move.y;
         this.moveHistory.shift();
         this.moveHistory.push(this.move);
         this.move = {x: 0, y: 0};
@@ -41,10 +42,10 @@ export abstract class ViewObject extends GameObject{
     hasScreenOut(){
         //画面からはみ出したら消す
         if(
-            this.shape.x < -300 ||
-            this.shape.x > 1300 ||
-            this.shape.y < -300 ||
-            this.shape.y > 1000){
+            this.body.position.x < -300 ||
+            this.body.position.x > 1300 ||
+            this.body.position.y < -300 ||
+            this.body.position.y > 1000){
             return true;
         }else{
             return false;
@@ -53,6 +54,5 @@ export abstract class ViewObject extends GameObject{
 
     remove(){
         super.remove();
-        this.game.level.collision.remove(this, this.shape);
     }
 }
