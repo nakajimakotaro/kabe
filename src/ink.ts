@@ -1,9 +1,9 @@
 import PIXI = require('pixi.js');
+import Matter = require("matter-js");
 import {Game} from "./script";
 import {GameObject} from "./gameObject";
 import {Wall} from "./wall";
 import {Ball} from "./ball";
-import {Collision} from "./collision";
 import {Shape,Rectangle,Circle,Point} from "./shape";
 import {ViewObject} from "./viewObject";
 
@@ -14,6 +14,13 @@ function random(min:number, max:number){
 export class Ink extends ViewObject{
     view:PIXI.Graphics;
     shape:Rectangle;
+    private body:Matter.Body;
+    public get position(){
+        return {x: this.body.position.x, y: this.body.position.y};
+    }
+    public get angle(){
+        return this.body.angle;
+    }
     splashList: {shape:Circle, angle:number, speed:number, firstSpeed:{x:number, y:number}}[] = [];
     constructor(public game:Game, public splashPoint:Point, public ball:Ball, wall:Wall, public color:number){
         super();
@@ -22,7 +29,7 @@ export class Ink extends ViewObject{
         const mask = new PIXI.Graphics();
         this.view.mask = mask;
         mask.beginFill(0);
-        mask.drawRect(wall.shape.left(), wall.shape.top(), wall.shape.width, wall.shape.height);
+        mask.drawRect(wall.sprite.x, wall.sprite.y, wall.sprite.width, wall.sprite.height);
         this.game.level.view.addChild(this.view);
 
 
@@ -32,35 +39,35 @@ export class Ink extends ViewObject{
     }
 
     setShape(wall:Wall){
-        let x = this.splashPoint.x;
-        let y = this.splashPoint.y;
-        let width = 40;
-        let height = 40;
-        //壁についたインクの当たり判定
-        if(wall.shape.width < width / 2){
-            x = wall.shape.x;
-            width = wall.shape.width;
-        }else if(this.splashPoint.x - width / 2 < wall.shape.left()){
-            width = (this.splashPoint.x + width) - wall.shape.left();
-            x = wall.shape.left() + width / 2;
-        }else if(this.splashPoint.x + width / 2 > wall.shape.right()){
-            width = wall.shape.right() - (this.splashPoint.x - width);
-            x = wall.shape.right() - width / 2;
-        }
+        //let x = this.splashPoint.x;
+        //let y = this.splashPoint.y;
+        //let width = 40;
+        //let height = 40;
+        ////壁についたインクの当たり判定
+        //if(wall.shape.width < width / 2){
+        //    x = wall.shape.x;
+        //    width = wall.shape.width;
+        //}else if(this.splashPoint.x - width / 2 < wall.shape.left()){
+        //    width = (this.splashPoint.x + width) - wall.shape.left();
+        //    x = wall.shape.left() + width / 2;
+        //}else if(this.splashPoint.x + width / 2 > wall.shape.right()){
+        //    width = wall.shape.right() - (this.splashPoint.x - width);
+        //    x = wall.shape.right() - width / 2;
+        //}
 
-        if(wall.shape.height < height / 2){
-            y = wall.shape.top();
-            height = wall.shape.height;
-        }else if(this.splashPoint.y - height / 2 < wall.shape.top()){
-            height = (this.splashPoint.y + height) - wall.shape.top();
-            y = wall.shape.top() + height / 2;
-        }else if(this.splashPoint.y + height / 2 > wall.shape.bottom()){
-            height = wall.shape.bottom() - (this.splashPoint.y - height / 2);
-            y = wall.shape.bottom() - height / 2;
-        }
+        //if(wall.shape.height < height / 2){
+        //    y = wall.shape.top();
+        //    height = wall.shape.height;
+        //}else if(this.splashPoint.y - height / 2 < wall.shape.top()){
+        //    height = (this.splashPoint.y + height) - wall.shape.top();
+        //    y = wall.shape.top() + height / 2;
+        //}else if(this.splashPoint.y + height / 2 > wall.shape.bottom()){
+        //    height = wall.shape.bottom() - (this.splashPoint.y - height / 2);
+        //    y = wall.shape.bottom() - height / 2;
+        //}
 
-        this.shape = new Rectangle(x, y, width, height);
-        this.game.level.collision.add(this, this.shape);
+        //this.shape = new Rectangle(x, y, width, height);
+        //this.game.level.collision.add(this, this.shape);
     }
     splashCreate(){
         const maxSize = 12;
@@ -131,12 +138,6 @@ export class Ink extends ViewObject{
     ability(ball:Ball, wall:Wall){
         let xReverse = 1;
         let yReverse = 1;
-        if(ball.shape.x < wall.shape.left() || ball.shape.x > wall.shape.right()){
-            xReverse = -1;
-        }
-        if(ball.shape.y < wall.shape.top() || ball.shape.y > wall.shape.bottom()){
-            yReverse = -1;
-        }
         let angle = Math.atan2(ball.moveAverage().y * -1 * yReverse, ball.moveAverage().x * xReverse);
         ball.shot(angle, ball.speed);
     }

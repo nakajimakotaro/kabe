@@ -1,4 +1,5 @@
 import PIXI = require('pixi.js');
+import Matter = require("matter-js");
 import {Game} from "./script";
 import {GameObject} from "./gameObject";
 import {ViewObject} from "./viewObject";
@@ -25,13 +26,20 @@ export interface Firework{
 }
 
 export class Particle extends ViewObject{
-    shape:Point = new Point(0, 0);
+    x:number;
+    y:number;
     particles:{shape:Circle, sprite:PIXI.Sprite, vector:{x:number, y:number}}[] = [];
 
+    public get position(){
+        return {x: this.x, y: this.y};
+    }
+    public get angle(){
+        return 0;
+    }
     constructor(public game:Game, public config:Firework){
         super();
-        this.shape.x = config.shape.x;
-        this.shape.y = config.shape.y;
+        this.x = config.shape.x;
+        this.y = config.shape.y;
 
         config.posRandom                = config.posRandom ? config.posRandom: {xmin: 0, xmax: 0, ymin: 0, ymax: 0};
         config.initialVelocity          = config.initialVelocity ? config.initialVelocity : {x: 0, y: 0};
@@ -57,9 +65,7 @@ export class Particle extends ViewObject{
                 },
             };
             this.presetTexture(particle);
-            this.game.resourceLoader.load(`${this.config.color}-${particle.shape.r}`).then((texture:PIXI.Texture)=>{
-                particle.sprite.texture = texture;
-            });
+            particle.sprite = this.game.resourceLoader.circle(particle.shape.r, this.config.color);
             this.game.level.view.addChild(particle.sprite);
             this.particles.push(particle);
         }

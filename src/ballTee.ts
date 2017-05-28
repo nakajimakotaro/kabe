@@ -1,22 +1,31 @@
 import PIXI = require('pixi.js');
+import Matter = require("matter-js");
 import {Game} from "./script";
 import {GameObject} from "./gameObject";
+import {ViewObject} from "./viewObject";
 import {Shape,Rectangle,Circle,Point} from "./shape";
 import {Ball} from "./ball"; 
-export class BallTee extends GameObject{
+export class BallTee extends ViewObject{
     ball:Ball;
     prevCreateFrame = 0;
-    constructor(public game:Game, public shape:Point){
+    public body:Matter.Body;
+    public get position(){
+        return {x: this.x, y: this.y};
+    }
+    public get angle(){
+        return this.body.angle;
+    }
+
+    constructor(public game:Game, public x:number, public y:number){
         super();
-        this.presetTexture();
         this.setBall();
     }
     update(){
         let view = this.game.level.view;
         view.beginFill(0xff0000);
         view.drawCircle(
-            this.shape.x,
-            this.shape.y,
+            this.position.x,
+            this.position.y,
             1
         );
         const canvas = this.game.app.view;
@@ -30,10 +39,10 @@ export class BallTee extends GameObject{
 
             const x = e.pageX - canvas.offsetLeft;
             const y = e.pageY - canvas.offsetTop;
-            const height = (y - this.shape.y) * -1;
-            let width  = (x - this.shape.x);
+            const height = (y - this.position.y) * -1;
+            let width  = (x - this.position.x);
             let angle = Math.atan2(height, width);
-            let speed = 5;
+            let speed = 0.01;
             this.ball.shot(angle, speed);
             this.setBall();
         }
@@ -58,33 +67,20 @@ export class BallTee extends GameObject{
         0xFF9800,
         0xFF5722
     ];
-    presetTexture(){
-        for(let color of this.colorList){
-            let texture = 
-                new PIXI.Graphics()
-                    .beginFill(color)
-                    .drawCircle(0, 0, 10)
-                    .generateCanvasTexture(1);
-            this.game.resourceLoader.setResource('0x' + color.toString(16), texture);
-        }
-    }
     currColorIndex = 0;
-    nextColor():number{
+    nextColor(): number {
         this.currColorIndex++;
-        if(this.colorList.length == this.currColorIndex){
+        if (this.colorList.length == this.currColorIndex) {
             this.currColorIndex = 0;
         }
         return this.colorList[this.currColorIndex];
     };
-    setBall(){
-
+    setBall() {
         this.ball = new Ball(
             this.game,
-            new Circle(
-                this.shape.x,
-                this.shape.y,
-                10
-            ),
+            this.position.x,
+            this.position.y,
+            10,
             this.nextColor()
         );
         this.game.level.addObject(this.ball);

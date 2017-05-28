@@ -5,7 +5,8 @@ import {GameObject} from "./gameObject";
 import {Shape} from "./shape";
 
 export abstract class ViewObject extends GameObject{
-    abstract body:Matter.Body;
+    abstract get position():{x:number, y:number};
+    abstract get angle():number;
     move = {x: 0, y: 0};
     moveHistory:{x: number, y: number}[]; //30フレーム前までの移動履歴
 
@@ -20,8 +21,8 @@ export abstract class ViewObject extends GameObject{
         this.moveOn();
     }
     moveOn(){
-        this.body.position.x += this.move.x;
-        this.body.position.y += this.move.y;
+        this.position.x += this.move.x;
+        this.position.y += this.move.y;
         this.moveHistory.shift();
         this.moveHistory.push(this.move);
         this.move = {x: 0, y: 0};
@@ -42,10 +43,10 @@ export abstract class ViewObject extends GameObject{
     hasScreenOut(){
         //画面からはみ出したら消す
         if(
-            this.body.position.x < -300 ||
-            this.body.position.x > 1300 ||
-            this.body.position.y < -300 ||
-            this.body.position.y > 1000){
+            this.position.x < -300 ||
+            this.position.x > 1300 ||
+            this.position.y < -300 ||
+            this.position.y > 1000){
             return true;
         }else{
             return false;

@@ -13,29 +13,65 @@ export class Ball extends ViewObject {
 
     speed = 0;
     sprite: PIXI.Sprite;
-    constructor(public game: Game, public body: Matter.Body, public color: number) {
+    private body: Matter.Body;
+    public get position() {
+        return { x: this.body.position.x, y: this.body.position.y };
+    }
+    public get angle() {
+        return this.body.angle;
+    }
+    constructor(public game: Game, x: number, y: number, radius: number, public color: number) {
         super();
-        this.sprite = new PIXI.Sprite(PIXI.Texture.EMPTY);
+        this.body = Matter.Bodies.circle(x, y, radius);
+        this.sprite = this.game.resourceLoader.circle(radius, color);
+        this.sprite.x = x;
+        this.sprite.y = y;
         this.game.level.view.addChild(this.sprite);
-        this.setColor(color);
-        //this.game.level.collision.add(this, this.body);
-    }
-    setColor(color: number) {
-        this.setSprite('0x' + color.toString(16));
-    }
-    setSprite(path: string) {
-        this.game.resourceLoader.load(path).then(
-            (texture: PIXI.Texture) => {
-                this.sprite.texture = texture;
-            });
+
+        this.game.level.addObject(new Particle(this.game, {
+            type: "firework",
+            shape: new Circle(
+                this.body.position.x,
+                this.body.position.y,
+                3,
+            ),
+            posRandom: {
+                xmin: -10,
+                xmax: 10,
+                ymin: -10,
+                ymax: 10,
+            },
+            color: this.color,
+            sparkNum: 20,
+            initialVelocity: {
+                x: this.moveAverage().x,
+                y: this.moveAverage().y,
+            },
+            randomVelocity: {
+                xmin: -10,
+                xmax: 10,
+                ymin: -5,
+                ymax: 10,
+            },
+            friction: {
+                x: 0.98,
+                y: 0.98,
+            },
+            endTime: 120 + this.game.level.countFrame,
+            gravity: {
+                x: 0,
+                y: 0.3,
+            },
+        }
+        ));
     }
     collisionHistory: Object[][] = new Array(10).fill(0).map(() => []);
     collisionActionFrame = 0;
     update() {
         super.update();
 
-        this.move.x += Math.cos(this.body.angle) * this.speed;
-        this.move.y += Math.sin(this.body.angle) * this.speed * -1;
+        //this.move.x += Math.cos(this.body.angle) * this.speed;
+        //this.move.y += Math.sin(this.body.angle) * this.speed * -1;
         this.collisionAction();
     }
     collisionAction() {
@@ -97,8 +133,8 @@ export class Ball extends ViewObject {
     }
     moveOn() {
         super.moveOn();
-        this.sprite.x = this.body.position.x - this.sprite.width / 2;
-        this.sprite.y = this.body.position.y - this.sprite.height / 2;
+        this.sprite.x = this.body.position.x;
+        this.sprite.y = this.body.position.y;
     }
     remove() {
         super.remove();
@@ -108,5 +144,17 @@ export class Ball extends ViewObject {
     shot(angle: number, speed: number) {
         this.body.angle = angle;
         this.speed = speed;
+        Matter.World.add(this.game.level.matterEngine.world, this.body);
+        Matter.Body.applyForce(
+            this.body,
+            {
+                x: this.position.x,
+                y: this.position.y
+            },
+            {
+                x: Math.cos(this.body.angle) * this.speed,
+                y: Math.sin(this.body.angle) * this.speed * -1,
+            }
+        );
     }
 }

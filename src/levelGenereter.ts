@@ -1,4 +1,5 @@
 import "pixi.js";
+import Matter = require("matter-js");
 import _ = require('lodash');
 import {Level} from "./level";
 import {Game} from "./script";
@@ -6,73 +7,52 @@ import {Wall} from "./wall";
 import {BallTee} from "./ballTee";
 import {Shape,Rectangle,Circle,Point} from "./shape";
 
-interface IRectangle{
-    type:"Rectangle";
-    x:number;
-    y:number;
-    w:number;
-    h:number;
-}
-function rectangleCreate(game:Game, rectangleData:IRectangle):Rectangle{
-    return new Rectangle(
-        rectangleData.x,
-        rectangleData.y,
-        rectangleData.w,
-        rectangleData.h
-    );
-}
-
-interface IPoint{
-    type:"Point";
-    x:number;
-    y:number;
-}
-function pointCreate(game:Game, pointData:IPoint):Point{
-    return new Point(
-        pointData.x,
-        pointData.y);
-}
-
 interface IWall{
     object:"Wall";
-    shape:IRectangle;
+    x:number,
+    y:number,
+    w:number,
+    h:number,
 }
 function wallCreate(game:Game, wallData:IWall):Wall{
-    const shape = new Rectangle(
-        wallData.shape.x,
-        wallData.shape.y,
-        wallData.shape.w,
-        wallData.shape.h
+    return new Wall(
+        game,
+        wallData.x,
+        wallData.y,
+        wallData.w,
+        wallData.h,
     );
-    return new Wall(game, shape);
 }
 
-interface IBallTee{
-    object:"BallTee";
-    shape:IPoint;
+interface IBallTee {
+    object: "BallTee";
+    x: number;
+    y: number;
 }
-function BallTeeCreate(game:Game, ballTeeData:IBallTee):BallTee{
-    const shape = new Point(
-        ballTeeData.shape.x,
-        ballTeeData.shape.y
+function BallTeeCreate(game: Game, ballTeeData: IBallTee): BallTee {
+    return new BallTee(
+        game,
+        ballTeeData.x,
+        ballTeeData.y
     );
-    return new BallTee(game, shape);
 }
 
-interface ILevelConfig{
-    shape: IRectangle;
+interface ILevelConfig {
+    width:number,
+    height:number,
 }
 
-interface ILevel{
+interface ILevel {
     levelConfig: ILevelConfig;
-    gameObject: Array<IWall|IBallTee>;
+    gameObject: Array<IWall | IBallTee>;
 }
-function levelCreate(game:Game, levelData:ILevel):Level{
+function levelCreate(game: Game, levelData: ILevel): Level {
     const level = new Level(game);
     game.level = level;
-    level.shape = rectangleCreate(game, levelData.levelConfig.shape);
-    for(let gameObjectData of levelData.gameObject){
-        switch(gameObjectData.object){
+    level.width = levelData.levelConfig.width;
+    level.height = levelData.levelConfig.height;
+    for (let gameObjectData of levelData.gameObject) {
+        switch (gameObjectData.object) {
             case "Wall":
                 level.addObject(wallCreate(game, gameObjectData));
                 break;
@@ -84,21 +64,21 @@ function levelCreate(game:Game, levelData:ILevel):Level{
     return level;
 }
 
-export class LevelGenereter{
-    static loadURL(game:Game, path:string):Promise<Level>{
-        return new Promise((resolve)=>{
+export class LevelGenereter {
+    static loadURL(game: Game, path: string): Promise<Level> {
+        return new Promise((resolve) => {
             const req = new XMLHttpRequest();
             req.open('GET', path, true);
-            req.addEventListener('load', ()=>{
+            req.addEventListener('load', () => {
                 resolve(req.responseText);
             });
             req.send(null);
-        }).then((levelText:string)=>{
+        }).then((levelText: string) => {
             const level = LevelGenereter.createLevel(game, levelText);
             return Promise.resolve(level);
         });
     }
-    static createLevel(game:Game, levelText:string):Level{
+    static createLevel(game: Game, levelText: string): Level {
         const levelData = JSON.parse(levelText) as ILevel;
         return levelCreate(game, levelData);
     }

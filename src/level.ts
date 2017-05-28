@@ -1,20 +1,20 @@
 import PIXI = require('pixi.js');
+import Matter = require("matter-js");
 import _ = require('lodash');
 import {Game} from "./script";
 import {GameObject} from "./gameObject";
 import {Shape,Rectangle,Circle} from "./shape";
-import {Collision} from "./collision";
 import {Wall} from "./wall"
 import {Ball} from "./ball"
 
 export class Level extends GameObject{
-    shape:Rectangle;
-    collision:Collision;
+    matterEngine:Matter.Engine;
+    width:number;
+    height:number;
     view:PIXI.Graphics;
 
     levelData:any;
     isLoad = false;
-
 
     gameObjectList:GameObject[] = [];
     removeQueueList:GameObject[] = [];
@@ -27,7 +27,9 @@ export class Level extends GameObject{
         super();
         this.view = new PIXI.Graphics();
         this.game.app.stage.addChild(this.view);
-        this.collision = new Collision(this.game);
+        this.matterEngine = Matter.Engine.create();
+        this.matterEngine.world.gravity.scale = .00;
+        Matter.Engine.run(this.matterEngine);
     }
     save(){
     }
@@ -61,7 +63,6 @@ export class Level extends GameObject{
             for(let object of this.gameObjectList){
                 object.update();
             }
-            this.collision.tick();
             this.removeExec();
         }
         this.countFrame++;
