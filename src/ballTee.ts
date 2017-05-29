@@ -42,7 +42,7 @@ export class BallTee extends ViewObject{
             const height = (y - this.position.y) * -1;
             let width  = (x - this.position.x);
             let angle = Math.atan2(height, width);
-            let speed = 0.01;
+            let speed = 10;
             this.ball.shot(angle, speed);
             this.setBall();
         }

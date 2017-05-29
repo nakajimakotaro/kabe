@@ -28,8 +28,14 @@ export class Level extends GameObject{
         this.view = new PIXI.Graphics();
         this.game.app.stage.addChild(this.view);
         this.matterEngine = Matter.Engine.create();
-        this.matterEngine.world.gravity.scale = .00;
+        this.matterEngine.world.gravity.x = 0;
+        this.matterEngine.world.gravity.y = 0;
         Matter.Engine.run(this.matterEngine);
+        let render = Matter.Render.create({
+            element: document.body,
+            engine: this.matterEngine
+        });
+        Matter.Render.run(render)
     }
     save(){
     }

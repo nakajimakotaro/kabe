@@ -22,48 +22,16 @@ export class Ball extends ViewObject {
     }
     constructor(public game: Game, x: number, y: number, radius: number, public color: number) {
         super();
-        this.body = Matter.Bodies.circle(x, y, radius);
+        this.body = Matter.Bodies.circle(x, y, radius, {
+            friction: 0,
+            frictionAir: 0,
+            frictionStatic: 0,
+            restitution: 1,
+        });
         this.sprite = this.game.resourceLoader.circle(radius, color);
         this.sprite.x = x;
         this.sprite.y = y;
         this.game.level.view.addChild(this.sprite);
-
-        this.game.level.addObject(new Particle(this.game, {
-            type: "firework",
-            shape: new Circle(
-                this.body.position.x,
-                this.body.position.y,
-                3,
-            ),
-            posRandom: {
-                xmin: -10,
-                xmax: 10,
-                ymin: -10,
-                ymax: 10,
-            },
-            color: this.color,
-            sparkNum: 20,
-            initialVelocity: {
-                x: this.moveAverage().x,
-                y: this.moveAverage().y,
-            },
-            randomVelocity: {
-                xmin: -10,
-                xmax: 10,
-                ymin: -5,
-                ymax: 10,
-            },
-            friction: {
-                x: 0.98,
-                y: 0.98,
-            },
-            endTime: 120 + this.game.level.countFrame,
-            gravity: {
-                x: 0,
-                y: 0.3,
-            },
-        }
-        ));
     }
     collisionHistory: Object[][] = new Array(10).fill(0).map(() => []);
     collisionActionFrame = 0;
@@ -145,12 +113,8 @@ export class Ball extends ViewObject {
         this.body.angle = angle;
         this.speed = speed;
         Matter.World.add(this.game.level.matterEngine.world, this.body);
-        Matter.Body.applyForce(
+        Matter.Body.setVelocity(
             this.body,
-            {
-                x: this.position.x,
-                y: this.position.y
-            },
             {
                 x: Math.cos(this.body.angle) * this.speed,
                 y: Math.sin(this.body.angle) * this.speed * -1,
