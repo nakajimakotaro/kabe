@@ -28,8 +28,11 @@ export class Ink extends ViewObject{
         this.view = new PIXI.Graphics();
         const mask = new PIXI.Graphics();
         this.view.mask = mask;
-        mask.beginFill(0);
-        mask.drawRect(wall.sprite.x, wall.sprite.y, wall.sprite.width, wall.sprite.height);
+        mask.beginFill(0x00ffff);
+        mask.drawRect(wall.sprite.width / -2, wall.sprite.height / -2, wall.sprite.width, wall.sprite.height);
+        mask.position.x = wall.sprite.x;
+        mask.position.y = wall.sprite.y;
+        mask.rotation = wall.angle;
         this.game.level.view.addChild(this.view);
 
 
@@ -122,7 +125,7 @@ export class Ink extends ViewObject{
             this.splashNext();
             this.nextCount++;
         }
-        let debug = true;
+        let debug = false;
         if(debug){
             this.game.level.view.endFill();
             this.game.level.view.lineStyle(1, 0x00ff00);

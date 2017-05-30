@@ -38,7 +38,8 @@ export class ResourceLoader {
                     .generateCanvasTexture(1);
         }
         let sprite = new PIXI.Sprite(this.textureList[key]);
-        sprite.anchor = new PIXI.ObservablePoint(() => { }, null, 0.5, 0.5);
+        sprite.anchor.x = 0.5;
+        sprite.anchor.y = 0.5;
         return sprite;
     }
     rectangle(width: number, height: number, color: number) {

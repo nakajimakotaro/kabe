@@ -23,6 +23,8 @@ export class Wall extends ViewObject{
             frictionStatic: 1,
         });
         this.body.isStatic = true;
+        this.body["userObject"] = this;
+        this.body["userCollisionList"] = [];
         Matter.World.add(this.game.level.matterEngine.world, this.body);
         this.sprite = this.game.resourceLoader.rectangle(width, height, 0x9C27B0);
         this.game.level.view.addChild(this.sprite);
@@ -31,6 +33,7 @@ export class Wall extends ViewObject{
         //this.game.level.collision.add(this, this.body);;
     }
     update(){
+        this.body["userCollisionList"] = [];
         let angle = this.sprite.rotation;
         angle += 0.01;
         if(angle > Math.PI * 2){

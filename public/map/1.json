@@ -1,51 +1,34 @@
 {
-    "levelConfig": [
-        "shape": {
-            "type": "Rectangle",
-            "x": 480,
-            "y": 270,
-            "w": 960,
-            "h": 540
-        }
-    ],
+    "levelConfig": {
+        "w": 960,
+        "h": 540
+    },
     "gameObject": [
         {
             "object": "Wall",
-            "shape": {
-                "type": "Rectangle",
-                "x": 300,
-                "y": 100,
-                "w": 300,
-                "h": 50
-            }
+            "x": 300,
+            "y": 100,
+            "w": 300,
+            "h": 50
         },
         {
             "object": "Wall",
-            "shape": {
-                "type": "Rectangle",
-                "x": 600,
-                "y": 300,
-                "w": 50,
-                "h": 300
-            }
+            "x": 600,
+            "y": 300,
+            "w": 50,
+            "h": 300
         },
         {
             "object": "Wall",
-            "shape": {
-                "type": "Rectangle",
-                "x": 300,
-                "y": 500,
-                "w": 300,
-                "h": 50
-            }
+            "x": 300,
+            "y": 500,
+            "w": 300,
+            "h": 50
         },
         {
             "object": "BallTee",
-            "shape": {
-                "type": "Point",
-                "x": 200,
-                "y": 400
-            }
+            "x": 200,
+            "y": 300
         }
     ]
 }
