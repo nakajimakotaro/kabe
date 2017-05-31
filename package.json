@@ -5,7 +5,9 @@
   "author": "nakajimakotaro <harusann2@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@types/matter-js": "^0.9.32",
     "lodash": "^4.17.4",
+    "matter-js": "^0.12.0",
     "pixi.js": "^4.5.2",
     "stats.js": "^0.17.0",
     "urijs": "^1.18.10",

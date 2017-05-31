@@ -10,6 +10,10 @@
   version "4.14.62"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.62.tgz#8674f9861582148a60b7a89cb260f11378d11683"
 
+"@types/matter-js@^0.9.32":
+  version "0.9.32"
+  resolved "https://registry.yarnpkg.com/@types/matter-js/-/matter-js-0.9.32.tgz#81a3e7fd96230f4922982b082cfa265614733a69"
+
 "@types/pixi.js@^4.4.4":
   version "4.4.4"
   resolved "https://registry.yarnpkg.com/@types/pixi.js/-/pixi.js-4.4.4.tgz#d6a3bdbdcd3719c99934215a6c6ad26315b9fb78"
@@ -1271,6 +1275,10 @@ lodash@^4.14.0, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.3.0:
 longest@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/longest/-/longest-1.0.1.tgz#30a0b2da38f73770e8294a0d22e6625ed77d0097"
+
+matter-js@^0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/matter-js/-/matter-js-0.12.0.tgz#dcb02d04326c47746c63a3772d1475753d72fe1e"
 
 media-typer@0.3.0:
   version "0.3.0"
